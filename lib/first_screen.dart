@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'login_page.dart';
 import 'sign_in.dart';
 
 class FirstScreen extends StatelessWidget {
+  final dbRef = FirebaseDatabase.instance.reference();
+
   @override
+
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
@@ -19,6 +23,7 @@ class FirstScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
+              /*
               CircleAvatar(
                 backgroundImage: NetworkImage(
                   imageUrl,
@@ -41,6 +46,7 @@ class FirstScreen extends StatelessWidget {
                     color: Colors.deepPurple,
                     fontWeight: FontWeight.bold),
               ),
+              */
               SizedBox(height: 20),
               Text(
                 'EMAIL',
@@ -70,14 +76,75 @@ class FirstScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 25, color: Colors.white),
                   ),
                 ),
-                elevation: 5,
+                elevation: 0,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(40)),
+                  borderRadius: BorderRadius.circular(40)
+                ),
+              ),
+              RaisedButton(
+                child: Text("Write Data"),
+                onPressed: ()
+                {
+                  writeData();
+                },
+              ),
+              RaisedButton(
+                child: Text("Read Data"),
+                onPressed: ()
+                {
+                  readData();
+                },
+              ),
+              RaisedButton(
+                child: Text("Update Data"),
+                onPressed: ()
+                {
+                  updateData();
+                },
+              ),
+              RaisedButton(
+                child: Text("Delete Data"),
+                onPressed: ()
+                {
+                  deleteData();
+                },
               )
             ],
           ),
         ),
       ),
     );
+  }
+  void writeData()
+  {
+    dbRef.child(userID).set
+    ({
+      "User ID" : userID,
+      "Loan Amount" : 500,
+      "Rent Amount" : 200,
+      "Move In Date" : "01/01/2020",
+      "Move Out Date" : "02/10/2020",
+      "Spend This Week" : 10,
+      "Spend This Month" : 50,
+      "Spend This Year" : 150,
+    });
+  }
+  void updateData()
+  {
+    dbRef.child(userID).update
+    ({
+      "Loan Amount" : 750,
+    });
+  }
+  void readData()
+  {
+    dbRef.once().then((DataSnapshot dataSnapshot)
+    {
+      print(dataSnapshot.value);
+    });
+  }
+  void deleteData()
+  {
+    dbRef.child(userID).remove();
   }
 }

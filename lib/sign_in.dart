@@ -7,12 +7,40 @@ final GoogleSignIn googleSignIn = GoogleSignIn();
 String name;
 String email;
 String imageUrl;
+String userID;
+
+void signUpEmailPassword(String em, String pw) async
+{
+  try
+  {
+    await _auth.createUserWithEmailAndPassword(email: em, password: pw);
+  }
+  catch (e)
+  {
+    print(e.toString());
+  }
+}
+
+Future<String> signInEmailPassword(String em, String pw) async
+{
+  final AuthResult authResult = await _auth.signInWithEmailAndPassword(email: em, password: pw);
+  final FirebaseUser user = authResult.user;
+
+  assert(user.email != null);
+
+  email = user.email;
+  userID = user.uid;
+
+  final FirebaseUser currentUser = await _auth.currentUser();
+  assert(user.uid == currentUser.uid);
+
+  return 'signInEmailPassword succeeded: $user';
+}
 
 Future<String> signInWithGoogle() async 
 {
   final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
-  final GoogleSignInAuthentication googleSignInAuthentication =
-      await googleSignInAccount.authentication;
+  final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
 
   final AuthCredential credential = GoogleAuthProvider.getCredential(
     accessToken: googleSignInAuthentication.accessToken,
@@ -29,6 +57,7 @@ Future<String> signInWithGoogle() async
   name = user.displayName;
   email = user.email;
   imageUrl = user.photoUrl;
+  userID = user.uid;
 
   if (name.contains(" ")) 
   {
