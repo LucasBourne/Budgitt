@@ -77,7 +77,7 @@ class _LoginPageState extends State<LoginPage>
   {
     return RaisedButton(
       child: Text(
-        "Sign Up", 
+        "Sign up", 
         style: GoogleFonts.karla(),
       ),
       onPressed: ()
@@ -98,7 +98,7 @@ class _LoginPageState extends State<LoginPage>
   {
     return RaisedButton(
       child: Text(
-        "Sign In",
+        "Sign in",
         style: GoogleFonts.karla(),
       ),
       onPressed: ()
@@ -126,9 +126,21 @@ class _LoginPageState extends State<LoginPage>
     return Container(
       alignment: Alignment.centerRight,
       child: RaisedButton(
-        child: Text(
-          "Sign in with Google",
-          style: GoogleFonts.karla(),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>
+          [
+            Image(
+              image: AssetImage("assets/GoogleLogo.png"),
+              height: 20,
+            ),
+            SizedBox(width: 10),
+            Text(
+              "Sign in with Google",
+              style: GoogleFonts.karla(),
+            ),
+          ]
         ),
         onPressed: () 
         {
@@ -145,7 +157,7 @@ class _LoginPageState extends State<LoginPage>
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
         ),
-        color: accentColour,
+        color: Colors.white,
         textColor: backgroundColour,
       ),
     );

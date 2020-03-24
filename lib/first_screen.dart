@@ -1,14 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'dart:async';
 import 'login_page.dart';
 import 'sign_in.dart';
+import 'User.dart';
 
-class FirstScreen extends StatelessWidget {
+class FirstScreen extends StatefulWidget 
+{
+  @override
+  FirstScreenState createState() => FirstScreenState();
+}
+
+class FirstScreenState extends State<FirstScreen>
+{
   final dbRef = FirebaseDatabase.instance.reference();
+  static Map<dynamic, dynamic> values = new Map<dynamic, dynamic>();
+  List<User> _userList;
+  StreamSubscription<Event> _onUserAddedSubscription;
+  StreamSubscription<Event> _onUserChangedSubscription;
+  Query _userQuery;
+  
+  @override
+  void initState()
+  {
+    super.initState();
+
+    _userList = new List();
+    _userQuery = dbRef.child("Users").child(userID).orderByChild("userId").equalTo(userID);
+    _onUserChangedSubscription = _userQuery.onChildChanged.listen(onEntryChanged);
+    _onUserAddedSubscription = _userQuery.onChildAdded.listen(onEntryAdded);
+  }
 
   @override
+  void dispose()
+  {
+    _onUserChangedSubscription.cancel();
+    _onUserAddedSubscription.cancel();
+    super.dispose();
+  }
 
-  Widget build(BuildContext context) {
+  onEntryAdded(Event event)
+  {
+    setState(() {
+      _userList.add(User.fromSnapshot(event.snapshot));
+    });
+  }
+  
+  onEntryChanged(Event event)
+  {
+    var oldEntry = _userList.singleWhere((entry)
+    {
+      return entry.key == event.snapshot.key;
+    });
+
+    setState(() {
+      _userList[_userList.indexOf(oldEntry)] = User.fromSnapshot(event.snapshot);
+    });
+  }
+
+  
+
+  Widget build(BuildContext context) 
+  {
+    
+
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -23,31 +79,6 @@ class FirstScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              /*
-              CircleAvatar(
-                backgroundImage: NetworkImage(
-                  imageUrl,
-                ),
-                radius: 60,
-                backgroundColor: Colors.transparent,
-              ),
-              SizedBox(height: 40),
-              Text(
-                'NAME',
-                style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54),
-              ),
-              Text(
-                name,
-                style: TextStyle(
-                    fontSize: 25,
-                    color: Colors.deepPurple,
-                    fontWeight: FontWeight.bold),
-              ),
-              */
-              SizedBox(height: 20),
               Text(
                 'EMAIL',
                 style: TextStyle(
@@ -62,6 +93,15 @@ class FirstScreen extends StatelessWidget {
                     color: Colors.deepPurple,
                     fontWeight: FontWeight.bold),
               ),
+              SizedBox(height: 20),
+              Text(
+                'LOAN AMOUNT',
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black54),
+              ),
+              showLoanAmount(),
               SizedBox(height: 40),
               RaisedButton(
                 onPressed: () {
@@ -85,7 +125,10 @@ class FirstScreen extends StatelessWidget {
                 child: Text("Write Data"),
                 onPressed: ()
                 {
-                  writeData();
+                  writeData("666");
+                  setState(() {
+                    
+                  });
                 },
               ),
               RaisedButton(
@@ -93,13 +136,16 @@ class FirstScreen extends StatelessWidget {
                 onPressed: ()
                 {
                   readData();
+                  setState(() {
+                    
+                  });
                 },
               ),
               RaisedButton(
                 child: Text("Update Data"),
                 onPressed: ()
                 {
-                  updateData();
+                  updateData(new User(750, userID));
                 },
               ),
               RaisedButton(
@@ -115,36 +161,71 @@ class FirstScreen extends StatelessWidget {
       ),
     );
   }
-  void writeData()
+  void writeData(String loanAmount)
   {
-    dbRef.child(userID).set
-    ({
-      "User ID" : userID,
-      "Loan Amount" : 500,
-      "Rent Amount" : 200,
-      "Move In Date" : "01/01/2020",
-      "Move Out Date" : "02/10/2020",
-      "Spend This Week" : 10,
-      "Spend This Month" : 50,
-      "Spend This Year" : 150,
-    });
+    User user = new User(int.parse(loanAmount), userID);
+    dbRef.child("Users").child(userID).push().set(user.toJson());
   }
-  void updateData()
+
+  void updateData(User user)
   {
-    dbRef.child(userID).update
-    ({
-      "Loan Amount" : 750,
-    });
+    if(user != null)
+    {
+      dbRef.child("Users").child(user.key).set(user.toJson());
+    }
   }
   void readData()
   {
-    dbRef.once().then((DataSnapshot dataSnapshot)
+    dbRef.child(userID).once().then((DataSnapshot ds)
     {
-      print(dataSnapshot.value);
+      values = ds.value;
+      print(values["loanAmount"]);
     });
   }
+                /*
+    dbRef.once().then((DataSnapshot dataSnapshot)
+    {
+      print(dataSnapshot.value(0));
+    });
+    */
   void deleteData()
   {
     dbRef.child(userID).remove();
+  }
+  Widget showLoanAmount()
+  {
+    if (_userList.length > 0)
+    {
+      return Text(
+        ("£" + _userList[0].loanAmount.toString()),
+        style: TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.bold,
+          color: Colors.black54
+        ),
+      );
+    }
+    else
+    {
+      //Prompt user for first time setup
+      return Text(
+        ("Error"),
+        style: TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.bold,
+          color: Colors.black54),
+      );
+    }
+  }
+  Widget showDialog()
+  {
+    return AlertDialog(
+      title: Text("No Loan Found"),
+      content: Text("Set up account?"),
+      actions: <Widget>
+      [
+        new FlatButton(onPressed: () { writeData("500"); }, child: new Text("Submit"))
+      ],
+    );
   }
 }
