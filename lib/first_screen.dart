@@ -68,7 +68,10 @@ class FirstScreenState extends State<FirstScreen>
               SizedBox(height: 40),
               RaisedButton(
               onPressed: () {
-                values.clear();
+                if (values != null)
+                {
+                  values.clear();
+                }
                 signOutGoogle();
                 Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) {return LoginPage();}), ModalRoute.withName('/'));
               },
@@ -137,7 +140,7 @@ class FirstScreenState extends State<FirstScreen>
 
   void updateData(int newLoanAmount)
   {
-    dbRef.child(userID).update(
+      dbRef.child(userID).update(
       {
         "loanAmount" : newLoanAmount,
       }
@@ -151,7 +154,14 @@ class FirstScreenState extends State<FirstScreen>
     dbRef.child(userID).once().then((DataSnapshot ds)
     {
       values = ds.value;
-      print(values["loanAmount"]);
+      if (values != null)
+      {
+        print(values["loanAmount"]);
+      }
+      else
+      {
+        print("loan amount not set");
+      }
       setState(() {});
     });
   }
