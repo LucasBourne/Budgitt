@@ -166,6 +166,7 @@ class FirstScreenState extends State<FirstScreen>
     if (dbRef.child(userID) != null)
     {
       dbRef.child(userID).remove();
+      values.clear();
       setState(() {
         readData();
       });
