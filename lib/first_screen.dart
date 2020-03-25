@@ -36,6 +36,14 @@ class FirstScreenState extends State<FirstScreen>
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
               Text(
+                ("Good morning, " + name),
+                style: GoogleFonts.karla(
+                  color: accentColour,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+              SizedBox(height: 40),
+              Text(
                 'EMAIL',
                 style: GoogleFonts.karla(
                   color: accentColour,
@@ -60,6 +68,7 @@ class FirstScreenState extends State<FirstScreen>
               SizedBox(height: 40),
               RaisedButton(
               onPressed: () {
+                values.clear();
                 signOutGoogle();
                 Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) {return LoginPage();}), ModalRoute.withName('/'));
               },
@@ -117,7 +126,7 @@ class FirstScreenState extends State<FirstScreen>
     //User user = new User(int.parse(loanAmount), userID);
     dbRef.child(userID).set(
       {
-        "name" : "Test Name",
+        "name" : name,
         "loanAmount" : loanAmount,
       }
     );
@@ -177,7 +186,7 @@ class FirstScreenState extends State<FirstScreen>
       }    
     }
     return Text(
-      ("Error"),
+      ("Loan amount not set"),
       style: GoogleFonts.karla(
         color: Colors.red[700],
       ),

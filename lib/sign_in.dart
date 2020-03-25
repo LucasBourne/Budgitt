@@ -28,6 +28,7 @@ Future<String> signInEmailPassword(String em, String pw) async
 
   assert(user.email != null);
 
+  name = "Email User";
   email = user.email;
   userID = user.uid;
 
@@ -59,11 +60,6 @@ Future<String> signInWithGoogle() async
   imageUrl = user.photoUrl;
   userID = user.uid;
 
-  if (name.contains(" ")) 
-  {
-    name = name.substring(0, name.indexOf(" "));
-  }
-
   assert(!user.isAnonymous);
   assert(await user.getIdToken() != null);
 
@@ -75,6 +71,7 @@ Future<String> signInWithGoogle() async
 
 void signOutGoogle() async
 {
+  await _auth.signOut();
   await googleSignIn.signOut();
   print("User Sign Out");
 }
