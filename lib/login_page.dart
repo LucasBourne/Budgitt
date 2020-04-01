@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage>
         children: <Widget>
         [
           _emailSignInFunctions(),
-          _signInGoogleButton(),
+          _otherSignIn(),
         ],
       ),
     );
@@ -195,6 +195,25 @@ class _LoginPageState extends State<LoginPage>
         autocorrect: false,
         keyboardType: TextInputType.emailAddress,
       ),
+    );
+  }
+
+  ExpansionTile _otherSignIn()
+  {
+    return ExpansionTile(
+      backgroundColor: Colors.transparent,
+      title: Text(
+        "Other sign in options",
+        textAlign: TextAlign.end,
+        style: GoogleFonts.karla(
+          color: accentColour,
+          fontSize: 15,
+        ),
+      ),
+      children: <Widget>
+      [
+        _signInGoogleButton(),
+      ],
     );
   }
 

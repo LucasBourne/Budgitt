@@ -1,4 +1,4 @@
-package com.example.budgitt
+package lucasbourne.budgitt
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

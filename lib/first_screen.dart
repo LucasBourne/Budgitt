@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'database_functions.dart';
 import 'login_page.dart';
 import 'sign_in.dart';
 
 Color accentColour = Color.fromRGBO(2, 195, 154, 1);
 Color backgroundColour = Color.fromRGBO(19, 21, 21, 1);
+int _selectedIndex = 1;
 
 class FirstScreen extends StatefulWidget 
 {
@@ -15,7 +18,7 @@ class FirstScreen extends StatefulWidget
 
 class FirstScreenState extends State<FirstScreen>
 {
-  final dbRef = FirebaseDatabase.instance.reference();
+
   static Map<dynamic, dynamic> values = new Map<dynamic, dynamic>();
   
   @override
@@ -122,29 +125,49 @@ class FirstScreenState extends State<FirstScreen>
           ],
         ),
       ),
+      bottomNavigationBar: GNav(
+        gap: 10,
+        activeColor: backgroundColour,
+        color: accentColour,
+        iconSize: 20,
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+        duration: Duration(milliseconds: 300),
+        tabBackgroundColor: accentColour,
+        tabs: 
+        [
+          GButton(
+            icon: Icons.insert_chart,
+            text: "Trends",
+          ),
+          GButton(
+            icon: Icons.home,
+            text: "Home",
+          ),
+          GButton(
+            icon: Icons.settings,
+            text: "Settings",
+          ),
+        ],
+        selectedIndex: _selectedIndex,
+        onTabChange: (index) 
+        {
+          setState(() {
+            _selectedIndex = index;
+          });
+        }
+      ),
     );
   }
   void writeData(int loanAmount)
   {
-    //User user = new User(int.parse(loanAmount), userID);
-    dbRef.child(userID).set(
-      {
-        "name" : name,
-        "loanAmount" : loanAmount,
-      }
-    );
+    dbWrite(loanAmount);
     setState(() {
       readData();
     });
   }
-
   void updateData(int newLoanAmount)
   {
-      dbRef.child(userID).update(
-      {
-        "loanAmount" : newLoanAmount,
-      }
-    );
+    dbUpdate(newLoanAmount);
     setState(() {
       readData();
     });
@@ -165,12 +188,6 @@ class FirstScreenState extends State<FirstScreen>
       setState(() {});
     });
   }
-                /*
-    dbRef.once().then((DataSnapshot dataSnapshot)
-    {
-      print(dataSnapshot.value(0));
-    });
-    */
   void deleteData()
   {
     if (dbRef.child(userID) != null)
