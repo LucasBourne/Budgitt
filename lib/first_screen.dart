@@ -1,14 +1,11 @@
+import 'package:budgitt/main_menu_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'database_functions.dart';
-import 'login_page.dart';
-import 'sign_in.dart';
+import 'settings_page.dart';
+import 'trends_page.dart';
 
 Color accentColour = Color.fromRGBO(2, 195, 154, 1);
 Color backgroundColour = Color.fromRGBO(19, 21, 21, 1);
-int _selectedIndex = 1;
 
 class FirstScreen extends StatefulWidget 
 {
@@ -18,14 +15,18 @@ class FirstScreen extends StatefulWidget
 
 class FirstScreenState extends State<FirstScreen>
 {
-
-  static Map<dynamic, dynamic> values = new Map<dynamic, dynamic>();
+  int _selectedIndex = 1;
+  final List<Widget> _children = 
+  [
+    TrendsScreen(),
+    MainMenuScreen(),
+    SettingsScreen(),
+  ];
   
   @override
   void initState()
   {
     super.initState();
-    readData();
   }
 
   @override
@@ -33,100 +34,9 @@ class FirstScreenState extends State<FirstScreen>
   {
     return Scaffold(
       backgroundColor: backgroundColour,
-      body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              Text(
-                ("Good morning, " + name),
-                style: GoogleFonts.karla(
-                  color: accentColour,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-              SizedBox(height: 40),
-              Text(
-                'EMAIL',
-                style: GoogleFonts.karla(
-                  color: accentColour,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                email,
-                style: GoogleFonts.karla(
-                  color: accentColour,
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'LOAN AMOUNT',
-                style: GoogleFonts.karla(
-                  color: accentColour,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              showLoanAmount(),
-              SizedBox(height: 40),
-              RaisedButton(
-              onPressed: () {
-                if (values != null)
-                {
-                  values.clear();
-                }
-                signOutGoogle();
-                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) {return LoginPage();}), ModalRoute.withName('/'));
-              },
-              color: accentColour,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Sign Out',
-                  style: GoogleFonts.karla(
-                  color: backgroundColour,
-                  fontWeight: FontWeight.bold
-                  ),
-                ),
-              ),
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40)
-              ),
-            ),
-            RaisedButton(
-              child: Text("Write Data"),
-              onPressed: ()
-              {
-                writeData(500);
-              },
-            ),
-            RaisedButton(
-              child: Text("Read Data"),
-              onPressed: ()
-              {
-                readData();
-              },
-            ),
-            RaisedButton(
-              child: Text("Update Data"),
-              onPressed: ()
-              {
-                updateData(750);
-              },
-            ),
-            RaisedButton(
-              child: Text("Delete Data"),
-              onPressed: ()
-              {
-                deleteData();
-              },
-            )
-          ],
-        ),
-      ),
+      body: _children[_selectedIndex],
       bottomNavigationBar: GNav(
-        gap: 10,
+        gap: 5,
         activeColor: backgroundColour,
         color: accentColour,
         iconSize: 20,
@@ -158,66 +68,5 @@ class FirstScreenState extends State<FirstScreen>
       ),
     );
   }
-  void writeData(int loanAmount)
-  {
-    dbWrite(loanAmount);
-    setState(() {
-      readData();
-    });
-  }
-  void updateData(int newLoanAmount)
-  {
-    dbUpdate(newLoanAmount);
-    setState(() {
-      readData();
-    });
-  }
-  void readData()
-  {
-    dbRef.child(userID).once().then((DataSnapshot ds)
-    {
-      values = ds.value;
-      if (values != null)
-      {
-        print(values["loanAmount"]);
-      }
-      else
-      {
-        print("loan amount not set");
-      }
-      setState(() {});
-    });
-  }
-  void deleteData()
-  {
-    if (dbRef.child(userID) != null)
-    {
-      dbRef.child(userID).remove();
-      values.clear();
-      setState(() {
-        readData();
-      });
-    }
-  }
-  Widget showLoanAmount()
-  {
-    if (values != null) 
-    {
-      if (values.length != 0)
-      {
-        return Text(
-          ("£" + values["loanAmount"].toString()),
-          style: GoogleFonts.karla(
-            color: accentColour,
-          ),
-        );
-      }    
-    }
-    return Text(
-      ("Loan amount not set"),
-      style: GoogleFonts.karla(
-        color: Colors.red[700],
-      ),
-    );
-  }
+
 }
