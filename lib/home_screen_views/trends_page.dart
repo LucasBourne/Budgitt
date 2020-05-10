@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'first_screen.dart';
+
+import '../home_screen.dart';
 
 class TrendsScreen extends StatefulWidget 
 {

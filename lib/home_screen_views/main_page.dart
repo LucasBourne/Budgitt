@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'first_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'database_functions.dart';
-import 'sign_in.dart';
-import 'login_page.dart';
 
-class MainMenuScreen extends StatefulWidget 
+import '../home_screen.dart';
+import '../database_functions.dart';
+import '../sign_in.dart';
+import '../login_page.dart';
+
+class MainScreen extends StatefulWidget 
 {
   @override
-  MainMenuScreenState createState() => MainMenuScreenState();
+  MainScreenState createState() => MainScreenState();
 }
-class MainMenuScreenState extends State<MainMenuScreen>
+class MainScreenState extends State<MainScreen>
 {
   static Map<dynamic, dynamic> values = new Map<dynamic, dynamic>();
   @override

@@ -1,8 +1,9 @@
-import 'package:budgitt/main_menu_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'settings_page.dart';
-import 'trends_page.dart';
+
+import 'home_screen_views/main_page.dart';
+import 'home_screen_views/settings_page.dart';
+import 'home_screen_views/trends_page.dart';
 
 Color accentColour = Color.fromRGBO(2, 195, 154, 1);
 Color backgroundColour = Color.fromRGBO(19, 21, 21, 1);
@@ -19,7 +20,7 @@ class FirstScreenState extends State<FirstScreen>
   final List<Widget> _children = 
   [
     TrendsScreen(),
-    MainMenuScreen(),
+    MainScreen(),
     SettingsScreen(),
   ];
   

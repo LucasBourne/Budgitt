@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 //import 'package:firebase_database/firebase_database.dart';
 //import 'database_functions.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'first_screen.dart';
+
+import '../home_screen.dart';
 
 class SettingsScreen extends StatefulWidget 
 {
