@@ -3,7 +3,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../home_screen.dart';
-import '../database_functions.dart';
 import '../sign_in.dart';
 import '../login_page.dart';
 
@@ -15,6 +14,8 @@ class MainScreen extends StatefulWidget
 class MainScreenState extends State<MainScreen>
 {
   static Map<dynamic, dynamic> values = new Map<dynamic, dynamic>();
+  final dbRef = FirebaseDatabase.instance.reference();
+
   @override
   void initState()
   {
@@ -40,16 +41,21 @@ class MainScreenState extends State<MainScreen>
     }
     return greeting;
   }
-  void writeData(int loanAmount)
+  void writeData(int newLoanAmount)
   {
-    dbWrite(loanAmount);
+    dbRef.child(userID).set({
+      "name" : name,
+      "loanAmount" : newLoanAmount,
+    });
     setState(() {
       readData();
     });
   }
   void updateData(int newLoanAmount)
   {
-    dbUpdate(newLoanAmount);
+    dbRef.child(userID).update({
+      "loanAmount" : newLoanAmount,
+    });
     setState(() {
       readData();
     });
