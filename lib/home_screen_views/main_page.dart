@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 import '../home_screen.dart';
 import '../sign_in.dart';
@@ -41,11 +42,22 @@ class MainScreenState extends State<MainScreen>
     }
     return greeting;
   }
+  String getDateCode(DateTime date)
+  {
+    int dayOfYear = int.parse(DateFormat("D").format(date));
+    int weekNumber = ((dayOfYear - date.weekday + 10) / 7).floor();
+    String dateCode = date.year.toString() + "-" + weekNumber.toString();
+    return dateCode; 
+  }
   void writeData(int newLoanAmount)
   {
     dbRef.child(userID).set({
       "name" : name,
-      "loanAmount" : newLoanAmount,
+      "iDat" : "01-01-2020",
+      "oDat" : "01-01-2021",
+      "loan" : newLoanAmount,
+      "spend" : 0,
+      "time" : getDateCode(DateTime.now()),
     });
     setState(() {
       readData();
@@ -203,7 +215,9 @@ class MainScreenState extends State<MainScreen>
           ],
         ),
       );
-      
-  
+ }
+ String getRemainingThisWeek()
+ {
+   return null;
  }
 }
