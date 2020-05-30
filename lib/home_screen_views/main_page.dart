@@ -49,12 +49,35 @@ class MainScreenState extends State<MainScreen>
     String dateCode = date.year.toString() + "-" + weekNumber.toString();
     return dateCode; 
   }
-  void writeData(int newLoanAmount)
+  double getWeeklyRemaining()
+  {
+    DateTime startDate;
+    DateTime endDate;
+    int loanDuration;
+    double loanAmount;
+    double spendPerWeek;
+    if(values["iDat"] != null && values["oDat"] != null)
+    {
+      startDate = DateTime.parse(values["iDat"]);
+      endDate = DateTime.parse(values["oDat"]);
+      loanDuration = endDate.difference(startDate).inDays;
+          
+      if(values["loan"] != null)
+      {
+        loanAmount = double.parse(values["loan"].toString());
+        int loanDurationInWeeks = (loanDuration / 7).ceil();
+        spendPerWeek = double.parse((loanAmount / loanDurationInWeeks).toStringAsFixed(2));
+        return spendPerWeek;
+      }
+    }
+    return null;
+  }
+  void writeData(double newLoanAmount)
   {
     dbRef.child(userID).set({
       "name" : name,
-      "iDat" : "01-01-2020",
-      "oDat" : "01-01-2021",
+      "iDat" : "20200131",
+      "oDat" : "20210131",
       "loan" : newLoanAmount,
       "spend" : 0,
       "time" : getDateCode(DateTime.now()),
@@ -66,7 +89,7 @@ class MainScreenState extends State<MainScreen>
   void updateData(int newLoanAmount)
   {
     dbRef.child(userID).update({
-      "loanAmount" : newLoanAmount,
+      "loan" : newLoanAmount,
     });
     setState(() {
       readData();
@@ -79,7 +102,7 @@ class MainScreenState extends State<MainScreen>
       values = ds.value;
       if (values != null)
       {
-        print(values["loanAmount"]);
+        print(values["loan"]);
       }
       else
       {
@@ -106,7 +129,7 @@ class MainScreenState extends State<MainScreen>
       if (values.length != 0)
       {
         return Text(
-          ("£" + values["loanAmount"].toString()),
+          ("£" + getWeeklyRemaining().toString()),
           style: GoogleFonts.karla(
             color: accentColour,
           ),
@@ -151,7 +174,7 @@ class MainScreenState extends State<MainScreen>
               ),
               SizedBox(height: 20),
               Text(
-                'LOAN AMOUNT',
+                'REMAINING WEEKLY SPEND:',
                 style: GoogleFonts.karla(
                   color: accentColour,
                   fontWeight: FontWeight.bold,
@@ -215,9 +238,5 @@ class MainScreenState extends State<MainScreen>
           ],
         ),
       );
- }
- String getRemainingThisWeek()
- {
-   return null;
  }
 }
