@@ -24,6 +24,18 @@ class MainScreenState extends State<MainScreen>
     readData();
   }
 
+  String writeName()
+  {
+    if(values["name"] != null)
+    {
+      return values["name"];
+    }
+    else
+    {
+      return "user";
+    }
+  }
+
   String writeGreeting()
   {
     String greeting = "";
@@ -86,7 +98,7 @@ class MainScreenState extends State<MainScreen>
       readData();
     });
   }
-  void updateData(int newLoanAmount)
+  void updateData(double newLoanAmount)
   {
     dbRef.child(userID).update({
       "loan" : newLoanAmount,
@@ -152,7 +164,7 @@ class MainScreenState extends State<MainScreen>
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
               Text(
-                (writeGreeting() + ", " + name),
+                (writeGreeting() + ", " + writeName()),
                 style: GoogleFonts.karla(
                   color: accentColour,
                   fontStyle: FontStyle.italic,
