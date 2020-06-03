@@ -69,7 +69,7 @@ Future<String> signInWithGoogle() async
   return 'signInWithGoogle succeeded: $user';
 }
 
-void signOutGoogle() async
+void signOutUser() async
 {
   await _auth.signOut();
   await googleSignIn.signOut();

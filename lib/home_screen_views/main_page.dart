@@ -17,6 +17,24 @@ class MainScreenState extends State<MainScreen>
   static Map<dynamic, dynamic> values = new Map<dynamic, dynamic>();
   final dbRef = FirebaseDatabase.instance.reference();
 
+  void showSnackBar(String message)
+  {
+    final snackBar = SnackBar(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: accentColour,
+      content: Text(
+        message,
+        style: GoogleFonts.karla(
+          color: backgroundColour
+        ),
+      ),
+    );
+    setState(() 
+    {
+      Scaffold.of(context).showSnackBar(snackBar);
+    });
+  }
+
   @override
   void initState()
   {
@@ -61,7 +79,8 @@ class MainScreenState extends State<MainScreen>
     String dateCode = date.year.toString() + "-" + weekNumber.toString();
     return dateCode; 
   }
-  double getWeeklyRemaining()
+  //Works out remaining spend per week over the entire length of the tenancy
+  double getAverageRemainingPerWeek()
   {
     DateTime startDate;
     DateTime endDate;
@@ -71,6 +90,30 @@ class MainScreenState extends State<MainScreen>
     if(values["iDat"] != null && values["oDat"] != null)
     {
       startDate = DateTime.parse(values["iDat"]);
+      endDate = DateTime.parse(values["oDat"]);
+      loanDuration = endDate.difference(startDate).inDays;
+          
+      if(values["loan"] != null)
+      {
+        loanAmount = double.parse(values["loan"].toString());
+        int loanDurationInWeeks = (loanDuration / 7).ceil();
+        spendPerWeek = double.parse((loanAmount / loanDurationInWeeks).toStringAsFixed(2));
+        return spendPerWeek;
+      }
+    }
+    return null;
+  }
+  //Works out remaining spend per week based on how far through the tennancy the user is
+  double getActualRemainingPerWeek()
+  {
+    DateTime startDate;
+    DateTime endDate;
+    int loanDuration;
+    double loanAmount;
+    double spendPerWeek;
+    if(values["iDat"] != null && values["oDat"] != null)
+    {
+      startDate = DateTime.now();
       endDate = DateTime.parse(values["oDat"]);
       loanDuration = endDate.difference(startDate).inDays;
           
@@ -141,7 +184,7 @@ class MainScreenState extends State<MainScreen>
       if (values.length != 0)
       {
         return Text(
-          ("£" + getWeeklyRemaining().toString()),
+          ("£" + getActualRemainingPerWeek().toString()),
           style: GoogleFonts.karla(
             color: accentColour,
           ),
@@ -200,7 +243,7 @@ class MainScreenState extends State<MainScreen>
                 {
                   values.clear();
                 }
-                signOutGoogle();
+                signOutUser();
                 Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) {return LoginPage();}), ModalRoute.withName('/'));
               },
               color: accentColour,

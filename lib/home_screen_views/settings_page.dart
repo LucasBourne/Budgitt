@@ -12,6 +12,7 @@ class SettingsScreen extends StatefulWidget
 }
 
 TextEditingController nameController = new TextEditingController();
+TextEditingController loanController = new TextEditingController();
 
 class SettingsScreenState extends State<SettingsScreen>
 {
@@ -45,71 +46,191 @@ class SettingsScreenState extends State<SettingsScreen>
   @override
   Widget build(BuildContext context) 
   {
+    return _mainColumn();
+  }
+
+  String getName()
+  {
+    if(values["name"] != null)
+    {
+      return values["name"];
+    }
+    else
+    {
+      return "Not set";
+    }
+  }
+
+  void showSnackBar(String message)
+  {
+    final snackBar = SnackBar(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: accentColour,
+      content: Text(
+        message,
+        style: GoogleFonts.karla(
+          color: backgroundColour
+        ),
+      ),
+    );
+    setState(() 
+    {
+      Scaffold.of(context).showSnackBar(snackBar);
+    });
+  }
+
+  void updateName()
+  {
+    if (nameController.text.trim().isEmpty)
+    {
+      showSnackBar("ERROR: Name cannot be blank");
+    }
+    else
+    {
+      dbRef.child(userID).update({
+        "name" : nameController.text,
+      });
+      setState(() 
+      {
+        readData();
+        showSnackBar("Name updated to " + nameController.text);
+      nameController.clear();
+      });
+    }
+  }
+
+  void updateLoan()
+  {
+    if (loanController.text.trim().isEmpty)
+    {
+      showSnackBar("ERROR: Loan amount cannot be blank");
+    }
+    else if(double.tryParse(loanController.text.trim()) == null) 
+    {
+      showSnackBar("ERROR: Loan amount is invalid");
+    }
+    else if(double.parse(loanController.text.trim()) < 0)
+    {
+      showSnackBar("ERROR: Loan amount cannot be negative");
+    }
+    else
+    {
+      String newLoanAmount = double.parse(loanController.text).toStringAsFixed(2);
+      dbRef.child(userID).update({
+        "loan" : double.parse(newLoanAmount),
+      });
+      setState(() 
+      {
+        readData();
+        showSnackBar("Loan value updated to £" + newLoanAmount);
+        loanController.clear();
+      });
+    }
+  }
+
+  Row _changeNameSetting()
+  {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        SizedBox(width: 10),
+        Flexible(
+          child: TextField(
+            autocorrect: false,
+            keyboardType: TextInputType.text,
+            style: TextStyle(color: accentColour),
+            cursorColor: accentColour,
+            controller: nameController,
+            onEditingComplete: ()
+            {
+              updateName();
+            },
+            decoration: InputDecoration(
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  color: accentColour
+                ),
+              ),
+              labelText: "New name",
+            ),
+          ),
+        ),
+        IconButton(
+          icon: Icon(Icons.add_circle),
+          iconSize: 20,
+          color: accentColour,
+          onPressed: () 
+          {
+            updateName();
+          },
+        ),
+      ],
+    );
+  }
+
+  Row _changeLoanSetting()
+  {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        SizedBox(width: 10),
+        Flexible(
+          child: TextField(
+            autocorrect: false,
+            keyboardType: TextInputType.number,
+            style: TextStyle(color: accentColour),
+            cursorColor: accentColour,
+            controller: loanController,
+            onEditingComplete: ()
+            {
+              updateLoan();
+            },
+            decoration: InputDecoration(
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  color: accentColour
+                ),
+              ),
+              labelText: "New loan amount",
+            ),
+          ),
+        ),
+        IconButton(
+          icon: Icon(Icons.add_circle),
+          iconSize: 20,
+          color: accentColour,
+          onPressed: () 
+          {
+            updateLoan();
+          },
+        ),
+      ],
+    );
+  }
+
+  Text _title()
+  {
+    return Text(
+      "Settings",
+      style: GoogleFonts.karla(
+        fontSize: 50,
+        color: accentColour,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  Center _mainColumn()
+  {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
-            TextField(
-            style: GoogleFonts.karla(color: accentColour),
-            controller: nameController,
-            cursorColor: accentColour,
-            decoration: InputDecoration(
-              labelText: "New name",
-              labelStyle: GoogleFonts.karla(color: accentColour),
-              icon: Icon(Icons.person, color: accentColour,),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: accentColour, 
-                  width: 3.0,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: accentColour, 
-                  width: 3.0,
-                ),
-              )
-            ),
-            obscureText: false,
-            autocorrect: false,
-            keyboardType: TextInputType.text,
-          ),
-          RaisedButton(
-            child: Text(
-              "Apply",
-              style: GoogleFonts.karla(),
-            ),
-            onPressed: ()
-            {
-              dbRef.child(userID).update({
-              "name" : nameController.text,
-              });
-              setState(() {
-              readData();
-            });
-              //update name on database
-            },
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
-            color: accentColour,
-            textColor: backgroundColour,
-          ),  
-        ],
-      ),
-    );
-  }
-
-  Padding _changeNameSetting()
-  {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          
+          _title(),
+          SizedBox(height: 100),
+          _changeNameSetting(),
+          _changeLoanSetting(),
         ],
       ),
     );

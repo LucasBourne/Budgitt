@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'home_screen_views/main_page.dart';
 import 'home_screen_views/settings_page.dart';
@@ -49,14 +50,17 @@ class FirstScreenState extends State<FirstScreen>
           GButton(
             icon: Icons.insert_chart,
             text: "Trends",
+            textStyle: GoogleFonts.karla(fontWeight: FontWeight.bold),
           ),
           GButton(
             icon: Icons.home,
             text: "Home",
+            textStyle: GoogleFonts.karla(fontWeight: FontWeight.bold),
           ),
           GButton(
             icon: Icons.settings,
             text: "Settings",
+            textStyle: GoogleFonts.karla(fontWeight: FontWeight.bold),
           ),
         ],
         selectedIndex: _selectedIndex,

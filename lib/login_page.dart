@@ -11,6 +11,29 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> 
 {
   @override
+  void initState()
+  {
+    super.initState();
+  }
+  void showSnackBar(String message)
+  {
+    final snackBar = SnackBar(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: accentColour,
+      content: Text(
+        message,
+        style: GoogleFonts.karla(
+          color: backgroundColour
+        ),
+      ),
+    );
+    setState(() 
+    {
+      Scaffold.of(context).showSnackBar(snackBar);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) 
   {
     return Scaffold(
@@ -82,9 +105,21 @@ class _LoginPageState extends State<LoginPage>
       ),
       onPressed: ()
       {
-        signUpEmailPassword(emailController.text, passwordController.text);
-        emailController.clear();
-        passwordController.clear();
+        if (emailController.text.trim().isEmpty)
+        {
+          showSnackBar("ERROR: Email field cannot be blank");
+        }
+        else if (passwordController.text.trim().isEmpty)
+        {
+          showSnackBar("ERROR: Password field cannot be blank");
+        }
+        else
+        {
+          signUpEmailPassword(emailController.text, passwordController.text);
+          showSnackBar("Account created successfully, you may now log in");
+          emailController.clear();
+          passwordController.clear();
+        }
       },
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(5),
@@ -103,15 +138,26 @@ class _LoginPageState extends State<LoginPage>
       ),
       onPressed: ()
       {
-        signInEmailPassword(emailController.text.trim(), passwordController.text.trim()).whenComplete(()
+        if (emailController.text.trim().isEmpty)
         {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) 
-            {
-             return FirstScreen();
-            }
-          ));
-        });
+          showSnackBar("ERROR: Email field cannot be blank");
+        }
+        else if (passwordController.text.trim().isEmpty)
+        {
+          showSnackBar("ERROR: Password field cannot be blank");
+        }
+        else
+        {
+          signInEmailPassword(emailController.text.trim(), passwordController.text.trim()).whenComplete(()
+          {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) 
+              {
+                return FirstScreen();
+              }
+            ));
+          });
+        }
       },
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(5),
