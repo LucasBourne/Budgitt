@@ -16,6 +16,7 @@ class MainScreenState extends State<MainScreen>
 {
   static Map<dynamic, dynamic> values = new Map<dynamic, dynamic>();
   final dbRef = FirebaseDatabase.instance.reference();
+  bool loanActive = false;
 
   void showSnackBar(String message)
   {
@@ -79,54 +80,47 @@ class MainScreenState extends State<MainScreen>
     String dateCode = date.year.toString() + "-" + weekNumber.toString();
     return dateCode; 
   }
-  //Works out remaining spend per week over the entire length of the tenancy
-  double getAverageRemainingPerWeek()
-  {
-    DateTime startDate;
-    DateTime endDate;
-    int loanDuration;
-    double loanAmount;
-    double spendPerWeek;
-    if(values["iDat"] != null && values["oDat"] != null)
-    {
-      startDate = DateTime.parse(values["iDat"]);
-      endDate = DateTime.parse(values["oDat"]);
-      loanDuration = endDate.difference(startDate).inDays;
-          
-      if(values["loan"] != null)
-      {
-        loanAmount = double.parse(values["loan"].toString());
-        int loanDurationInWeeks = (loanDuration / 7).ceil();
-        spendPerWeek = double.parse((loanAmount / loanDurationInWeeks).toStringAsFixed(2));
-        return spendPerWeek;
-      }
-    }
-    return null;
-  }
   //Works out remaining spend per week based on how far through the tennancy the user is
-  double getActualRemainingPerWeek()
+  String getRemainingPerWeek()
   {
-    DateTime startDate;
-    DateTime endDate;
+    DateTime loanStart;
+    DateTime loanEnd;
+    DateTime durationStart;
     int loanDuration;
     double loanAmount;
-    double spendPerWeek;
+    String spendPerWeek;
     if(values["iDat"] != null && values["oDat"] != null)
     {
-      startDate = DateTime.now();
-      endDate = DateTime.parse(values["oDat"]);
-      loanDuration = endDate.difference(startDate).inDays;
-          
-      if(values["loan"] != null)
+      loanStart = DateTime.parse(values["iDat"]);
+      loanEnd = DateTime.parse(values["oDat"]);
+      if(DateTime.now().isBefore(loanStart))
       {
-        loanAmount = double.parse(values["loan"].toString());
-        int loanDurationInWeeks = (loanDuration / 7).ceil();
-        spendPerWeek = double.parse((loanAmount / loanDurationInWeeks).toStringAsFixed(2));
-        return spendPerWeek;
+        loanActive = false;
+        return "Your loan has not yet been paid.";
+      }
+      else if(DateTime.now().isAfter(loanEnd))
+      {
+        loanActive = false;
+        return "You've reached your end date. Well done!";
+      }
+      else
+      {
+        loanActive = true;
+        durationStart = DateTime.now();
+        loanDuration = loanEnd.difference(durationStart).inDays;
+          
+        if(values["loan"] != null)
+        {
+          loanAmount = double.parse(values["loan"].toString());
+          int loanDurationInWeeks = (loanDuration / 7).ceil();
+          spendPerWeek = (loanAmount / loanDurationInWeeks).toStringAsFixed(2);
+          return "£" + spendPerWeek;
+        }
       }
     }
     return null;
   }
+
   void writeData(double newLoanAmount)
   {
     dbRef.child(userID).set({
@@ -141,28 +135,11 @@ class MainScreenState extends State<MainScreen>
       readData();
     });
   }
-  void updateData(double newLoanAmount)
-  {
-    dbRef.child(userID).update({
-      "loan" : newLoanAmount,
-    });
-    setState(() {
-      readData();
-    });
-  }
   void readData()
   {
     dbRef.child(userID).once().then((DataSnapshot ds)
     {
       values = ds.value;
-      if (values != null)
-      {
-        print(values["loan"]);
-      }
-      else
-      {
-        print("loan amount not set");
-      }
       setState(() {});
     });
   }
@@ -181,10 +158,10 @@ class MainScreenState extends State<MainScreen>
   {
     if (values != null) 
     {
-      if (values.length != 0)
+      if (values.containsKey("loan"))
       {
         return Text(
-          ("£" + getActualRemainingPerWeek().toString()),
+          getRemainingPerWeek(),
           style: GoogleFonts.karla(
             color: accentColour,
           ),
@@ -192,9 +169,21 @@ class MainScreenState extends State<MainScreen>
       }    
     }
     return Text(
-      ("Loan amount not set"),
+      ("Set up account in Settings"),
       style: GoogleFonts.karla(
-        color: Colors.red[700],
+        color: accentColour,
+      ),
+    );
+  }
+
+  Text _title()
+  {
+    return Text(
+      "Home",
+      style: GoogleFonts.karla(
+        fontSize: 50,
+        color: accentColour,
+        fontWeight: FontWeight.bold,
       ),
     );
   }
@@ -206,6 +195,7 @@ class MainScreenState extends State<MainScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
+              _title(),
               Text(
                 (writeGreeting() + ", " + writeName()),
                 style: GoogleFonts.karla(
@@ -213,21 +203,7 @@ class MainScreenState extends State<MainScreen>
                   fontStyle: FontStyle.italic,
                 ),
               ),
-              SizedBox(height: 40),
-              Text(
-                'EMAIL',
-                style: GoogleFonts.karla(
-                  color: accentColour,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                email,
-                style: GoogleFonts.karla(
-                  color: accentColour,
-                ),
-              ),
-              SizedBox(height: 20),
+              SizedBox(height: 100),
               Text(
                 'REMAINING WEEKLY SPEND:',
                 style: GoogleFonts.karla(
@@ -236,7 +212,7 @@ class MainScreenState extends State<MainScreen>
                 ),
               ),
               showLoanAmount(),
-              SizedBox(height: 40),
+              SizedBox(height: 10),
               RaisedButton(
               onPressed: () {
                 if (values != null)
@@ -274,13 +250,6 @@ class MainScreenState extends State<MainScreen>
               onPressed: ()
               {
                 readData();
-              },
-            ),
-            RaisedButton(
-              child: Text("Update Data"),
-              onPressed: ()
-              {
-                updateData(750);
               },
             ),
             RaisedButton(

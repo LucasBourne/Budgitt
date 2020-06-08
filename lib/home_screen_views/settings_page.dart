@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:intl/intl.dart';
 
 import '../home_screen.dart';
 import '../sign_in.dart';
@@ -13,6 +14,9 @@ class SettingsScreen extends StatefulWidget
 
 TextEditingController nameController = new TextEditingController();
 TextEditingController loanController = new TextEditingController();
+
+DateTime startDate = DateTime.now();
+DateTime endDate = DateTime.now().add(new Duration(days: 1));
 
 class SettingsScreenState extends State<SettingsScreen>
 {
@@ -97,6 +101,54 @@ class SettingsScreenState extends State<SettingsScreen>
       nameController.clear();
       });
     }
+  }
+
+  String getDateString(DateTime date)
+  {
+    String year = date.year.toString();
+    String month = "";
+    String day = "";
+    if (date.month.toString().length < 2)
+    {
+      month = "0" + date.month.toString();
+    }
+    else
+    {
+      month = date.month.toString();
+    }
+    if (date.day.toString().length < 2)
+    {
+      day = "0" + date.day.toString();
+    }
+    else
+    {
+      day = date.day.toString();
+    }
+    return year + month + day;
+  }
+
+  void updateStartDate(DateTime newDate, String dateKey, bool startDate)
+  {
+    String newDateString = getDateString(newDate);
+    String snackBarString = "";
+    if (startDate)
+    {
+      snackBarString = "Start ";
+    }
+    else
+    {
+      snackBarString = "End ";
+    }
+    snackBarString += "date updated successfully";
+
+    dbRef.child(userID).update({
+      dateKey : newDateString,
+    });
+    setState(() 
+    {
+      readData();
+      showSnackBar(snackBarString);
+    });
   }
 
   void updateLoan()
@@ -208,6 +260,96 @@ class SettingsScreenState extends State<SettingsScreen>
     );
   }
 
+  RaisedButton _pickStartDateButton()
+  {
+    return RaisedButton(
+      onPressed: () {
+        showDatePicker(
+          context: context, 
+          initialDate: startDate,
+          firstDate: DateTime.now().subtract(new Duration(days: 1000)), 
+          lastDate: startDate.add(new Duration(days: 1000)),
+        ).then((date) {
+          setState(() {
+            if(date != null)
+            {
+              startDate = date;
+              updateStartDate(date, "iDat", true);
+              if(endDate.isBefore(startDate))
+              {
+                endDate = startDate.add(new Duration(days: 1));
+              } 
+            }
+          });
+        });
+      },
+      color: accentColour,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          "Set Start Date",
+          style: GoogleFonts.karla(
+            color: backgroundColour,
+            fontWeight: FontWeight.bold
+          ),
+        ),
+      ),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(40)
+      ),
+    );
+  }
+
+  RaisedButton _pickEndDateButton()
+  {
+    return RaisedButton(
+      onPressed: () {
+        showDatePicker(
+          context: context, 
+          initialDate: endDate,
+          firstDate: startDate.add(new Duration(days: 1)), 
+          lastDate: startDate.add(new Duration(days: 1000)),
+        ).then((date) {
+          setState(() {
+            if(date != null)
+            {
+              endDate = date;
+              updateStartDate(date, "oDat", false);
+            }
+          });
+        });
+      },
+      color: accentColour,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          "Set End Date",
+          style: GoogleFonts.karla(
+            color: backgroundColour,
+            fontWeight: FontWeight.bold
+          ),
+        ),
+      ),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(40)
+      ),
+    );
+  }
+
+  Row _changeDateSetting()
+  {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        _pickStartDateButton(),
+        SizedBox(width: 20,),
+        _pickEndDateButton(),
+      ]
+    );
+  }
+
   Text _title()
   {
     return Text(
@@ -220,6 +362,40 @@ class SettingsScreenState extends State<SettingsScreen>
     );
   }
 
+  Widget _showStartDate()
+  {
+    if (values != null) 
+    {
+      if (values.containsKey("iDat"))
+      {
+        startDate = DateTime.parse(values["iDat"]);
+      }    
+    }
+    return Text(
+      ("Start Date: " + DateFormat("yMMMMd").format(startDate)),
+      style: GoogleFonts.karla(
+        color: accentColour,
+      ),
+    );
+  }
+
+  Widget _showEndDate()
+  {
+    if (values != null) 
+    {
+      if (values.containsKey("oDat"))
+      {
+        endDate = DateTime.parse(values["oDat"]);
+      }    
+    }
+    return Text(
+      ("End Date: " + DateFormat("yMMMMd").format(endDate)),
+      style: GoogleFonts.karla(
+        color: accentColour,
+      ),
+    );
+  }
+
   Center _mainColumn()
   {
     return Center(
@@ -228,9 +404,13 @@ class SettingsScreenState extends State<SettingsScreen>
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           _title(),
-          SizedBox(height: 100),
+          SizedBox(height: 150),
           _changeNameSetting(),
           _changeLoanSetting(),
+          SizedBox(height: 20),
+          _showStartDate(),
+          _showEndDate(),
+          _changeDateSetting(),
         ],
       ),
     );
