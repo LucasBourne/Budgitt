@@ -38,6 +38,8 @@ class SettingsScreenState extends State<SettingsScreen>
       if (values != null)
       {
         print("User found");
+        nameController.text = values["name"];
+        loanController.text = values["loan"].toString();
       }
       else
       {

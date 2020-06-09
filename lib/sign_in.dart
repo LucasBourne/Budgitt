@@ -23,19 +23,26 @@ void signUpEmailPassword(String em, String pw) async
 
 Future<String> signInEmailPassword(String em, String pw) async
 {
-  final AuthResult authResult = await _auth.signInWithEmailAndPassword(email: em, password: pw);
-  final FirebaseUser user = authResult.user;
+  try
+  {
+    final AuthResult authResult = await _auth.signInWithEmailAndPassword(email: em.trim(), password: pw);
+    final FirebaseUser user = authResult.user;
+  
+    assert(user.email != null);
 
-  assert(user.email != null);
+    name = "Email User";
+    email = user.email;
+    userID = user.uid;
 
-  name = "Email User";
-  email = user.email;
-  userID = user.uid;
+    final FirebaseUser currentUser = await _auth.currentUser();
+    assert(user.uid == currentUser.uid);
 
-  final FirebaseUser currentUser = await _auth.currentUser();
-  assert(user.uid == currentUser.uid);
-
-  return 'signInEmailPassword succeeded: $user';
+    return 'signInEmailPassword succeeded: $user';
+  }
+  catch(PlatformException)
+  {
+    return "invalid login credentials";
+  }
 }
 
 Future<String> signInWithGoogle() async 

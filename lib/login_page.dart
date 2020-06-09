@@ -10,33 +10,18 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> 
 {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   void initState()
   {
     super.initState();
-  }
-  void showSnackBar(String message)
-  {
-    final snackBar = SnackBar(
-      behavior: SnackBarBehavior.floating,
-      backgroundColor: accentColour,
-      content: Text(
-        message,
-        style: GoogleFonts.karla(
-          color: backgroundColour
-        ),
-      ),
-    );
-    setState(() 
-    {
-      Scaffold.of(context).showSnackBar(snackBar);
-    });
   }
 
   @override
   Widget build(BuildContext context) 
   {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: backgroundColour,
       body: Center(
         child: Column(
@@ -59,6 +44,24 @@ class _LoginPageState extends State<LoginPage>
 
   Color accentColour = Color.fromRGBO(2, 195, 154, 1);
   Color backgroundColour = Color.fromRGBO(19, 21, 21, 1);
+
+  void showSnackBar(String message)
+  {
+    final snackBar = SnackBar(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: accentColour,
+      content: Text(
+        message,
+        style: GoogleFonts.karla(
+          color: backgroundColour
+        ),
+      ),
+    );
+    setState(() 
+    {
+      _scaffoldKey.currentState.showSnackBar(snackBar);
+    });
+  }
 
   Padding _signInFunctions()
   {
@@ -129,7 +132,7 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  RaisedButton _signInButton()
+  RaisedButton _signInButton() 
   {
     return RaisedButton(
       child: Text(
@@ -148,14 +151,21 @@ class _LoginPageState extends State<LoginPage>
         }
         else
         {
-          signInEmailPassword(emailController.text.trim(), passwordController.text.trim()).whenComplete(()
+          signInEmailPassword(emailController.text.trim(), passwordController.text.trim()).then((result)
           {
-            Navigator.of(context).push(MaterialPageRoute(
+            if (result == "invalid login credentials")
+            {
+              showSnackBar("ERROR: Invalid login credentials");
+            }
+            else
+            {
+              Navigator.of(context).push(MaterialPageRoute(
               builder: (context) 
               {
                 return FirstScreen();
               }
             ));
+            }
           });
         }
       },
