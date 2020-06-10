@@ -35,6 +35,7 @@ class FirstScreenState extends State<FirstScreen>
   Widget build(BuildContext context) 
   {
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
       backgroundColor: backgroundColour,
       body: _children[_selectedIndex],
       bottomNavigationBar: GNav(

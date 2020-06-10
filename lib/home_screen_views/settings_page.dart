@@ -14,6 +14,7 @@ class SettingsScreen extends StatefulWidget
 
 TextEditingController nameController = new TextEditingController();
 TextEditingController loanController = new TextEditingController();
+bool accountActive = false;
 
 DateTime startDate = DateTime.now();
 DateTime endDate = DateTime.now().add(new Duration(days: 1));
@@ -38,11 +39,15 @@ class SettingsScreenState extends State<SettingsScreen>
       if (values != null)
       {
         print("User found");
+        accountActive = true;
         nameController.text = values["name"];
         loanController.text = values["loan"].toString();
       }
       else
       {
+        accountActive = false;
+        nameController.clear();
+        loanController.clear();
         print("User not found");
       }
       setState(() {});
@@ -100,7 +105,6 @@ class SettingsScreenState extends State<SettingsScreen>
       {
         readData();
         showSnackBar("Name updated to " + nameController.text);
-      nameController.clear();
       });
     }
   }
@@ -177,7 +181,6 @@ class SettingsScreenState extends State<SettingsScreen>
       {
         readData();
         showSnackBar("Loan value updated to £" + newLoanAmount);
-        loanController.clear();
       });
     }
   }
@@ -195,10 +198,7 @@ class SettingsScreenState extends State<SettingsScreen>
             style: TextStyle(color: accentColour),
             cursorColor: accentColour,
             controller: nameController,
-            onEditingComplete: ()
-            {
-              updateName();
-            },
+            textInputAction: TextInputAction.none,
             decoration: InputDecoration(
               enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(
@@ -208,15 +208,6 @@ class SettingsScreenState extends State<SettingsScreen>
               labelText: "New name",
             ),
           ),
-        ),
-        IconButton(
-          icon: Icon(Icons.add_circle),
-          iconSize: 20,
-          color: accentColour,
-          onPressed: () 
-          {
-            updateName();
-          },
         ),
       ],
     );
@@ -235,10 +226,7 @@ class SettingsScreenState extends State<SettingsScreen>
             style: TextStyle(color: accentColour),
             cursorColor: accentColour,
             controller: loanController,
-            onEditingComplete: ()
-            {
-              updateLoan();
-            },
+            textInputAction: TextInputAction.none,
             decoration: InputDecoration(
               enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(
@@ -248,15 +236,6 @@ class SettingsScreenState extends State<SettingsScreen>
               labelText: "New loan amount",
             ),
           ),
-        ),
-        IconButton(
-          icon: Icon(Icons.add_circle),
-          iconSize: 20,
-          color: accentColour,
-          onPressed: () 
-          {
-            updateLoan();
-          },
         ),
       ],
     );
@@ -366,55 +345,158 @@ class SettingsScreenState extends State<SettingsScreen>
 
   Widget _showStartDate()
   {
-    if (values != null) 
+    if (values != null && values.containsKey("iDat")) 
     {
-      if (values.containsKey("iDat"))
-      {
-        startDate = DateTime.parse(values["iDat"]);
-      }    
+      startDate = DateTime.parse(values["iDat"]);
+      return Text(
+        ("Start Date: " + DateFormat("yMMMMd").format(startDate)),
+        style: GoogleFonts.karla(
+          color: accentColour,
+        ),
+      );    
     }
-    return Text(
-      ("Start Date: " + DateFormat("yMMMMd").format(startDate)),
-      style: GoogleFonts.karla(
-        color: accentColour,
+    else
+    {
+      return Text(
+        ("Start Date: Not set"),
+        style: GoogleFonts.karla(
+          color: accentColour,
+        ),
+      );  
+    }
+  }
+
+  RaisedButton _submitButton()
+  {
+    return RaisedButton(
+      onPressed: () {
+        if (nameController.text != values["name"])
+        {
+          updateName();
+        }
+        if (loanController.text != values["loan"].toString())
+        {
+          updateLoan();
+        }
+      },
+      color: accentColour,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          'Update Details',
+          style: GoogleFonts.karla(
+            color: backgroundColour,
+            fontWeight: FontWeight.bold
+          ),
+        ),
+      ),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(40)
       ),
     );
   }
 
   Widget _showEndDate()
   {
-    if (values != null) 
+    if (values != null && values.containsKey("oDat")) 
     {
-      if (values.containsKey("oDat"))
-      {
-        endDate = DateTime.parse(values["oDat"]);
-      }    
+      endDate = DateTime.parse(values["oDat"]);
+      return Text(
+        ("End Date: " + DateFormat("yMMMMd").format(endDate)),
+        style: GoogleFonts.karla(
+          color: accentColour,
+        ),
+      );  
     }
-    return Text(
-      ("End Date: " + DateFormat("yMMMMd").format(endDate)),
-      style: GoogleFonts.karla(
-        color: accentColour,
+    else
+    {
+      return Text(
+        ("End Date: Not set"),
+        style: GoogleFonts.karla(
+          color: accentColour,
+        ),
+      ); 
+    }
+    
+  }
+
+  void deleteData()
+  {
+    if (dbRef.child(userID) != null)
+    {
+      dbRef.child(userID).remove();
+      values.clear();
+      setState(() {
+        accountActive = false;
+        readData();
+      });
+    }
+  }
+
+  RaisedButton _deleteDataButton()
+  {
+    return RaisedButton(
+      onPressed: ()
+      {
+        //Show warning
+        deleteData();
+      },
+      color: Colors.red,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          'Delete Data',
+          style: GoogleFonts.karla(
+            color: backgroundColour,
+            fontWeight: FontWeight.bold
+          ),
+        ),
+      ),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(40)
       ),
     );
   }
 
   Center _mainColumn()
   {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          _title(),
-          SizedBox(height: 150),
-          _changeNameSetting(),
-          _changeLoanSetting(),
-          SizedBox(height: 20),
-          _showStartDate(),
-          _showEndDate(),
-          _changeDateSetting(),
-        ],
-      ),
-    );
+    if(accountActive)
+    {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            _title(),
+            SizedBox(height: 150),
+            _changeNameSetting(),
+            _changeLoanSetting(),
+            SizedBox(height: 20),
+            _showStartDate(),
+            _showEndDate(),
+            _changeDateSetting(),
+            _deleteDataButton(),
+            SizedBox(height: 30),
+            _submitButton(),
+          ],
+        ),
+      );
+    }
+    else
+    {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            _title(),
+            SizedBox(height: 150),
+            _submitButton(),
+          ],
+        ),
+      );
+    }
   }
 }

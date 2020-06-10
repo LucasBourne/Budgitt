@@ -200,14 +200,21 @@ class _LoginPageState extends State<LoginPage>
         ),
         onPressed: () 
         {
-          signInWithGoogle().whenComplete(()
+          signInWithGoogle().then((result)
           {
-            Navigator.of(context).push(MaterialPageRoute(
+            if (result == "success")
+            {
+              Navigator.of(context).push(MaterialPageRoute(
               builder: (context) 
               {
                 return FirstScreen();
               },
-            ));
+              ));
+            }
+            else
+            {
+              showSnackBar("ERROR: There was an error with Google sign in");
+            }
          });
         },
         shape: RoundedRectangleBorder(

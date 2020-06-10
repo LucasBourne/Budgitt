@@ -45,14 +45,19 @@ class MainScreenState extends State<MainScreen>
 
   String writeName()
   {
-    if(values["name"] != null)
+    String nameToReturn = "";
+    if(name != null)
     {
-      return values["name"];
+      nameToReturn = name;
     }
-    else
+    if(values != null)
     {
-      return "user";
+      if(values["name"] != null)
+      {
+        nameToReturn = values["name"];
+      }
     }
+    return nameToReturn;
   }
 
   String writeGreeting()
@@ -128,8 +133,9 @@ class MainScreenState extends State<MainScreen>
       "iDat" : "20200131",
       "oDat" : "20210131",
       "loan" : newLoanAmount,
-      "spend" : 0,
-      "time" : getDateCode(DateTime.now()),
+      "wSpend" : 0,
+      "tSpend" : 0,
+      "dCode" : getDateCode(DateTime.now()),
     });
     setState(() {
       readData();
@@ -142,17 +148,6 @@ class MainScreenState extends State<MainScreen>
       values = ds.value;
       setState(() {});
     });
-  }
-  void deleteData()
-  {
-    if (dbRef.child(userID) != null)
-    {
-      dbRef.child(userID).remove();
-      values.clear();
-      setState(() {
-        readData();
-      });
-    }
   }
   Widget showLoanAmount()
   {
@@ -252,13 +247,6 @@ class MainScreenState extends State<MainScreen>
                 readData();
               },
             ),
-            RaisedButton(
-              child: Text("Delete Data"),
-              onPressed: ()
-              {
-                deleteData();
-              },
-            )
           ],
         ),
       );
