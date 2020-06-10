@@ -12,6 +12,9 @@ class MainScreen extends StatefulWidget
   @override
   MainScreenState createState() => MainScreenState();
 }
+
+TextEditingController transactionController = new TextEditingController();
+
 class MainScreenState extends State<MainScreen>
 {
   static Map<dynamic, dynamic> values = new Map<dynamic, dynamic>();
@@ -149,6 +152,109 @@ class MainScreenState extends State<MainScreen>
       setState(() {});
     });
   }
+
+  Row _changeNameSetting()
+  {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        SizedBox(width: 10),
+        Flexible(
+          child: TextField(
+            autocorrect: false,
+            keyboardType: TextInputType.text,
+            style: TextStyle(color: accentColour),
+            cursorColor: accentColour,
+            controller: transactionController,
+            textInputAction: TextInputAction.none,
+            decoration: InputDecoration(
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  color: accentColour
+                ),
+              ),
+              labelText: "New name",
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Padding _transactionField()
+  {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
+      child: TextField(
+        style: GoogleFonts.karla(color: accentColour),
+        controller: transactionController,
+        cursorColor: accentColour,
+        decoration: InputDecoration(
+          labelText: "Transaction Amount",
+          labelStyle: GoogleFonts.karla(color: accentColour),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: accentColour, 
+              width: 3.0,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: accentColour, 
+              width: 3.0,
+            ),
+          )
+        ),
+        obscureText: false,
+        autocorrect: false,
+        keyboardType: TextInputType.number,
+      ),
+    );
+  }
+
+  void handlePayment()
+  {
+
+  }
+
+  Row _transactionRow()
+  {
+    return Row(
+      mainAxisAlignment:  MainAxisAlignment.center,
+      children: <Widget>[
+        Flexible(
+          child: _transactionField(),
+        ),
+        _submitPaymentButton(),
+      ],
+    );
+  }
+
+  RaisedButton _submitPaymentButton()
+  {
+    return RaisedButton(
+      onPressed: ()
+      {
+        handlePayment();
+      },
+      color: accentColour,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          'Add',
+          style: GoogleFonts.karla(
+            color: backgroundColour,
+            fontWeight: FontWeight.bold
+          ),
+        ),
+      ),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(40)
+      ),
+    );
+  }
+
   Widget showLoanAmount()
   {
     if (values != null) 
@@ -208,6 +314,8 @@ class MainScreenState extends State<MainScreen>
               ),
               showLoanAmount(),
               SizedBox(height: 10),
+              _transactionRow(),
+              SizedBox(height: 10),
               RaisedButton(
               onPressed: () {
                 if (values != null)
@@ -238,13 +346,6 @@ class MainScreenState extends State<MainScreen>
               onPressed: ()
               {
                 writeData(500);
-              },
-            ),
-            RaisedButton(
-              child: Text("Read Data"),
-              onPressed: ()
-              {
-                readData();
               },
             ),
           ],

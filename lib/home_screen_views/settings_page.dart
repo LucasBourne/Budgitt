@@ -268,7 +268,7 @@ class SettingsScreenState extends State<SettingsScreen>
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Text(
-          "Set Start Date",
+          "Set Date",
           style: GoogleFonts.karla(
             color: backgroundColour,
             fontWeight: FontWeight.bold
@@ -305,7 +305,7 @@ class SettingsScreenState extends State<SettingsScreen>
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Text(
-          "Set End Date",
+          "Set Date",
           style: GoogleFonts.karla(
             color: backgroundColour,
             fontWeight: FontWeight.bold
@@ -316,18 +316,6 @@ class SettingsScreenState extends State<SettingsScreen>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(40)
       ),
-    );
-  }
-
-  Row _changeDateSetting()
-  {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        _pickStartDateButton(),
-        SizedBox(width: 20,),
-        _pickEndDateButton(),
-      ]
     );
   }
 
@@ -382,18 +370,51 @@ class SettingsScreenState extends State<SettingsScreen>
       color: accentColour,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Text(
-          'Update Details',
-          style: GoogleFonts.karla(
-            color: backgroundColour,
-            fontWeight: FontWeight.bold
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              Icons.save,
+              color: backgroundColour,
+            ),
+            SizedBox(width: 10),
+            Text(
+             'Save Details',
+              style: GoogleFonts.karla(
+                color: backgroundColour,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       ),
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(40)
       ),
+    );
+  }
+
+  Row _startDateFunctions()
+  {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        _showStartDate(),
+        _pickStartDateButton(),
+      ],
+    );
+  }
+
+  Row _endDateFunctions()
+  {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        _showEndDate(),
+        _pickEndDateButton(),
+      ],
     );
   }
 
@@ -418,7 +439,6 @@ class SettingsScreenState extends State<SettingsScreen>
         ),
       ); 
     }
-    
   }
 
   void deleteData()
@@ -427,6 +447,7 @@ class SettingsScreenState extends State<SettingsScreen>
     {
       dbRef.child(userID).remove();
       values.clear();
+      showSnackBar("User data successfully deleted");
       setState(() {
         accountActive = false;
         readData();
@@ -434,21 +455,71 @@ class SettingsScreenState extends State<SettingsScreen>
     }
   }
 
+  void _confirmDelete() 
+  {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) 
+      {
+        return AlertDialog(
+          backgroundColor: backgroundColour,
+          title: Text(
+            "Delete Data",
+            style: GoogleFonts.karla(
+              color: accentColour,
+            ),
+          ),
+          content: Text(
+            "Warning: This will delete all current user information. This cannot be undone. Would you like to continue with deletion?",
+            style: GoogleFonts.karla(
+              color: accentColour,
+            ),
+          ),
+          actions: <Widget>[
+            //buttons at the bottom of the dialog
+            FlatButton(
+              child: Text(
+                "Yes",
+                style: GoogleFonts.karla(
+                  color: accentColour,
+                ),
+              ),
+              onPressed: () {
+                deleteData();
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text(
+                "No",
+                style: GoogleFonts.karla(
+                  color: accentColour,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
   RaisedButton _deleteDataButton()
   {
     return RaisedButton(
       onPressed: ()
       {
-        //Show warning
-        deleteData();
+        _confirmDelete();
       },
-      color: Colors.red,
+      color: Colors.white12,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Text(
           'Delete Data',
           style: GoogleFonts.karla(
-            color: backgroundColour,
+            color: Colors.red[400],
             fontWeight: FontWeight.bold
           ),
         ),
@@ -473,13 +544,13 @@ class SettingsScreenState extends State<SettingsScreen>
             SizedBox(height: 150),
             _changeNameSetting(),
             _changeLoanSetting(),
-            SizedBox(height: 20),
-            _showStartDate(),
-            _showEndDate(),
-            _changeDateSetting(),
-            _deleteDataButton(),
-            SizedBox(height: 30),
+            SizedBox(height: 10),
             _submitButton(),
+            SizedBox(height: 10),
+            _startDateFunctions(),
+            _endDateFunctions(),
+            SizedBox(height: 40),
+            _deleteDataButton(),
           ],
         ),
       );
