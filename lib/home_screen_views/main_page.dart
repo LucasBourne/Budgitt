@@ -84,9 +84,55 @@ class MainScreenState extends State<MainScreen>
   String getDateCode(DateTime date)
   {
     int dayOfYear = int.parse(DateFormat("D").format(date));
-    int weekNumber = ((dayOfYear - date.weekday + 10) / 7).floor();
-    String dateCode = date.year.toString() + "-" + weekNumber.toString();
+    String weekNumber = ((dayOfYear - date.weekday + 10) / 7).floor().toString();
+    if (weekNumber.length < 2)
+    {
+      weekNumber = "0" + weekNumber;
+    }
+    String dateCode = date.year.toString() + weekNumber;
     return dateCode; 
+  }
+  Text getWeeklyAfterSpend()
+  {
+    String temp = getRemainingPerWeek();
+    if (!loanActive)
+    {
+      return Text(
+        temp,
+        style: GoogleFonts.karla(
+          color: Colors.amber[600]
+        ),
+      );
+    }
+    else
+    {
+      double beforeWeeklyDeduction = double.parse(temp);
+      double toDeduct = values["wSpend"].toDouble();
+      double afterWeeklyDeduction = beforeWeeklyDeduction - toDeduct;
+      TextStyle style;
+      if (toDeduct + values["tSpend"] > values["loan"])
+      {
+        style = GoogleFonts.karla(
+          color: Colors.red[400],
+        );
+      }
+      else if (toDeduct > beforeWeeklyDeduction)
+      {
+        style = GoogleFonts.karla(
+          color: Colors.amber[600],
+        );
+      }
+      else
+      {
+        style = GoogleFonts.karla(
+          color: accentColour,
+        );
+      }
+      return Text(
+        "£" + afterWeeklyDeduction.toStringAsFixed(2),
+        style: style,
+      );
+    }
   }
   //Works out remaining spend per week based on how far through the tennancy the user is
   String getRemainingPerWeek()
@@ -95,8 +141,8 @@ class MainScreenState extends State<MainScreen>
     DateTime loanEnd;
     DateTime durationStart;
     int loanDuration;
-    double loanAmount;
-    String spendPerWeek;
+    double remainingLoan;
+    double remainingPerWeek;
     if(values["iDat"] != null && values["oDat"] != null)
     {
       loanStart = DateTime.parse(values["iDat"]);
@@ -115,35 +161,35 @@ class MainScreenState extends State<MainScreen>
       {
         loanActive = true;
         durationStart = DateTime.now();
-        loanDuration = loanEnd.difference(durationStart).inDays;
-          
-        if(values["loan"] != null)
+        loanDuration = loanEnd.difference(durationStart).inDays + 1;
+
+        if(int.parse(getDateCode(DateTime.now())) > int.parse(values["dCode"]))
         {
-          loanAmount = double.parse(values["loan"].toString());
-          int loanDurationInWeeks = (loanDuration / 7).ceil();
-          spendPerWeek = (loanAmount / loanDurationInWeeks).toStringAsFixed(2);
-          return "£" + spendPerWeek;
+          double oldTotal = values["tSpend"].toDouble();
+          dbRef.child(userID).update({
+            "tSpend" : oldTotal + values["wSpend"],
+            "wSpend" : 0.0,
+            "dCode" : getDateCode(DateTime.now())
+          });
+          setState(() {
+            readData();
+          });
+        }
+        else
+        {
+          if(values["loan"] != null && values["tSpend"] != null)
+          {
+            remainingLoan = double.parse(values["loan"].toString()) - double.parse(values["tSpend"].toString());
+            int loanDurationInWeeks = (loanDuration / 7).ceil();
+            remainingPerWeek = double.parse((remainingLoan / loanDurationInWeeks).toString());
+            return remainingPerWeek.toString();
+          }        
         }
       }
     }
-    return null;
+    return "0";
   }
 
-  void writeData(double newLoanAmount)
-  {
-    dbRef.child(userID).set({
-      "name" : name,
-      "iDat" : "20200131",
-      "oDat" : "20210131",
-      "loan" : newLoanAmount,
-      "wSpend" : 0,
-      "tSpend" : 0,
-      "dCode" : getDateCode(DateTime.now()),
-    });
-    setState(() {
-      readData();
-    });
-  }
   void readData()
   {
     dbRef.child(userID).once().then((DataSnapshot ds)
@@ -151,34 +197,6 @@ class MainScreenState extends State<MainScreen>
       values = ds.value;
       setState(() {});
     });
-  }
-
-  Row _changeNameSetting()
-  {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        SizedBox(width: 10),
-        Flexible(
-          child: TextField(
-            autocorrect: false,
-            keyboardType: TextInputType.text,
-            style: TextStyle(color: accentColour),
-            cursorColor: accentColour,
-            controller: transactionController,
-            textInputAction: TextInputAction.none,
-            decoration: InputDecoration(
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: accentColour
-                ),
-              ),
-              labelText: "New name",
-            ),
-          ),
-        ),
-      ],
-    );
   }
 
   Padding _transactionField()
@@ -189,21 +207,18 @@ class MainScreenState extends State<MainScreen>
         style: GoogleFonts.karla(color: accentColour),
         controller: transactionController,
         cursorColor: accentColour,
+        onEditingComplete: ()
+        {
+          handlePayment();
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },
         decoration: InputDecoration(
-          labelText: "Transaction Amount",
-          labelStyle: GoogleFonts.karla(color: accentColour),
-          enabledBorder: OutlineInputBorder(
+          enabledBorder: UnderlineInputBorder(
             borderSide: BorderSide(
-              color: accentColour, 
-              width: 3.0,
+              color: accentColour
             ),
           ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: accentColour, 
-              width: 3.0,
-            ),
-          )
+          labelText: "Transaction Amount (£)",
         ),
         obscureText: false,
         autocorrect: false,
@@ -214,20 +229,46 @@ class MainScreenState extends State<MainScreen>
 
   void handlePayment()
   {
+    if (transactionController.text.trim().isEmpty)
+    {
+      showSnackBar("ERROR: Transaction amount cannot be blank");
+    }
+    else
+    {
+      double transactionValue = double.parse(transactionController.text);
+      String newWeeklySpend = (values["wSpend"] + transactionValue).toStringAsFixed(2);
 
+      dbRef.child(userID).update({
+        "wSpend" : double.parse(newWeeklySpend),
+      });
+      setState(() 
+      {
+        readData();
+        showSnackBar("Payment of £" + transactionValue.toStringAsFixed(2) + " made successfully");
+        transactionController.clear();
+      });
+    }
   }
 
   Row _transactionRow()
   {
-    return Row(
-      mainAxisAlignment:  MainAxisAlignment.center,
-      children: <Widget>[
-        Flexible(
-          child: _transactionField(),
-        ),
-        _submitPaymentButton(),
-      ],
-    );
+    if(loanActive)
+    {
+      return Row(
+        mainAxisAlignment:  MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Flexible(
+            child: _transactionField(),
+          ),
+          _submitPaymentButton(),
+          SizedBox(width: 10),
+        ],
+      );
+    }
+    else
+    {
+      return Row();
+    }
   }
 
   RaisedButton _submitPaymentButton()
@@ -236,6 +277,7 @@ class MainScreenState extends State<MainScreen>
       onPressed: ()
       {
         handlePayment();
+        FocusScope.of(context).requestFocus(new FocusNode());
       },
       color: accentColour,
       child: Padding(
@@ -257,24 +299,21 @@ class MainScreenState extends State<MainScreen>
 
   Widget showLoanAmount()
   {
-    if (values != null) 
+    if (values != null && values.length == 7) 
     {
-      if (values.containsKey("loan"))
-      {
-        return Text(
-          getRemainingPerWeek(),
-          style: GoogleFonts.karla(
-            color: accentColour,
-          ),
-        );
-      }    
+      return getWeeklyAfterSpend();   
     }
-    return Text(
-      ("Set up account in Settings"),
-      style: GoogleFonts.karla(
-        color: accentColour,
-      ),
-    );
+    else
+    {
+      loanActive = false;
+      return Text(
+        ("Set up account in Settings"),
+        style: GoogleFonts.karla(
+          color: accentColour,
+        ),
+      );
+    }
+    
   }
 
   Text _title()
@@ -340,13 +379,6 @@ class MainScreenState extends State<MainScreen>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(40)
               ),
-            ),
-            RaisedButton(
-              child: Text("Write Data"),
-              onPressed: ()
-              {
-                writeData(500);
-              },
             ),
           ],
         ),

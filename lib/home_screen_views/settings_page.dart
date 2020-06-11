@@ -198,14 +198,17 @@ class SettingsScreenState extends State<SettingsScreen>
             style: TextStyle(color: accentColour),
             cursorColor: accentColour,
             controller: nameController,
-            textInputAction: TextInputAction.none,
+            onEditingComplete: ()
+            {
+              FocusScope.of(context).requestFocus(new FocusNode());
+            },
             decoration: InputDecoration(
               enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(
                   color: accentColour
                 ),
               ),
-              labelText: "New name",
+              labelText: "Name",
             ),
           ),
         ),
@@ -226,14 +229,17 @@ class SettingsScreenState extends State<SettingsScreen>
             style: TextStyle(color: accentColour),
             cursorColor: accentColour,
             controller: loanController,
-            textInputAction: TextInputAction.none,
+            onEditingComplete: ()
+            {
+              FocusScope.of(context).requestFocus(new FocusNode());
+            },
             decoration: InputDecoration(
               enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(
                   color: accentColour
                 ),
               ),
-              labelText: "New loan amount",
+              labelText: "Loan amount (£)",
             ),
           ),
         ),
@@ -255,11 +261,11 @@ class SettingsScreenState extends State<SettingsScreen>
             if(date != null)
             {
               startDate = date;
-              updateStartDate(date, "iDat", true);
-              if(endDate.isBefore(startDate))
+              if(endDate.isBefore(startDate) || startDate == endDate)
               {
                 endDate = startDate.add(new Duration(days: 1));
               } 
+              FocusScope.of(context).requestFocus(new FocusNode());
             }
           });
         });
@@ -289,15 +295,15 @@ class SettingsScreenState extends State<SettingsScreen>
         showDatePicker(
           context: context, 
           initialDate: endDate,
-          firstDate: startDate.add(new Duration(days: 1)), 
+          firstDate: startDate, 
           lastDate: startDate.add(new Duration(days: 1000)),
         ).then((date) {
           setState(() {
             if(date != null)
             {
               endDate = date;
-              updateStartDate(date, "oDat", false);
             }
+            FocusScope.of(context).requestFocus(new FocusNode());
           });
         });
       },
@@ -336,36 +342,84 @@ class SettingsScreenState extends State<SettingsScreen>
     if (values != null && values.containsKey("iDat")) 
     {
       startDate = DateTime.parse(values["iDat"]);
-      return Text(
-        ("Start Date: " + DateFormat("yMMMMd").format(startDate)),
-        style: GoogleFonts.karla(
-          color: accentColour,
-        ),
-      );    
     }
-    else
+    return Text(
+      ("Start Date: " + DateFormat("yMMMMd").format(startDate)),
+      style: GoogleFonts.karla(
+        color: accentColour,
+      ),
+    );    
+  }
+
+  String getDateCode(DateTime date)
+  {
+    int dayOfYear = int.parse(DateFormat("D").format(date));
+    String weekNumber = ((dayOfYear - date.weekday + 10) / 7).floor().toString();
+    if (weekNumber.length < 2)
     {
-      return Text(
-        ("Start Date: Not set"),
-        style: GoogleFonts.karla(
-          color: accentColour,
-        ),
-      );  
+      weekNumber = "0" + weekNumber;
     }
+    String dateCode = date.year.toString() + weekNumber;
+    return dateCode; 
   }
 
   RaisedButton _submitButton()
   {
     return RaisedButton(
       onPressed: () {
-        if (nameController.text != values["name"])
+        if(values == null)
         {
-          updateName();
+          if(nameController.text.trim().isEmpty)
+          {
+            showSnackBar("ERROR: Name cannot be blank");
+          }
+          else if(loanController.text.trim().isEmpty)
+          {
+            showSnackBar("ERROR: Loan amount cannot be blank");
+          }
+          else if(double.tryParse(loanController.text.trim()) == null) 
+          {
+            showSnackBar("ERROR: Loan amount is invalid");
+          }
+          else if(double.parse(loanController.text.trim()) < 0)
+          {
+            showSnackBar("ERROR: Loan amount cannot be negative");
+          }
+          else 
+          {
+            dbRef.child(userID).set({
+            "dCode" : getDateCode(DateTime.now()),
+            "iDat" : getDateString(startDate),
+            "loan" : double.parse(loanController.text),
+            "name" : nameController.text,
+            "oDat" : getDateString(endDate),
+            "tSpend" : 0,
+            "wSpend" : 0,
+            });
+            accountActive = true;
+            showSnackBar("Account successfully created");
+          }
         }
-        if (loanController.text != values["loan"].toString())
+        else
         {
-          updateLoan();
+          if (nameController.text != values["name"])
+          {
+            updateName();
+            dbRef.child(userID).update({
+              "dCode" : getDateCode(DateTime.now()),
+            });
+          }
+          if (loanController.text != values["loan"].toString())
+          {
+            updateLoan();
+            dbRef.child(userID).update({
+              "dCode" : getDateCode(DateTime.now()),
+            });
+          }
+          updateStartDate(startDate, "iDat", true);
+          updateStartDate(endDate, "oDat", false);
         }
+        FocusScope.of(context).requestFocus(new FocusNode());
       },
       color: accentColour,
       child: Padding(
@@ -423,22 +477,13 @@ class SettingsScreenState extends State<SettingsScreen>
     if (values != null && values.containsKey("oDat")) 
     {
       endDate = DateTime.parse(values["oDat"]);
-      return Text(
-        ("End Date: " + DateFormat("yMMMMd").format(endDate)),
-        style: GoogleFonts.karla(
-          color: accentColour,
-        ),
-      );  
     }
-    else
-    {
-      return Text(
-        ("End Date: Not set"),
-        style: GoogleFonts.karla(
-          color: accentColour,
-        ),
-      ); 
-    }
+    return Text(
+      ("End Date: " + DateFormat("yMMMMd").format(endDate)),
+      style: GoogleFonts.karla(
+        color: accentColour,
+      ),
+    );  
   }
 
   void deleteData()
@@ -447,9 +492,13 @@ class SettingsScreenState extends State<SettingsScreen>
     {
       dbRef.child(userID).remove();
       values.clear();
+      nameController.clear();
+      loanController.clear();
+      startDate = DateTime.now();
+      endDate = DateTime.now().add(new Duration(days: 1));
+      accountActive = false;
       showSnackBar("User data successfully deleted");
       setState(() {
-        accountActive = false;
         readData();
       });
     }
@@ -533,7 +582,7 @@ class SettingsScreenState extends State<SettingsScreen>
 
   Center _mainColumn()
   {
-    if(accountActive)
+    if (accountActive)
     {
       return Center(
         child: Column(
@@ -545,11 +594,10 @@ class SettingsScreenState extends State<SettingsScreen>
             _changeNameSetting(),
             _changeLoanSetting(),
             SizedBox(height: 10),
-            _submitButton(),
-            SizedBox(height: 10),
             _startDateFunctions(),
             _endDateFunctions(),
-            SizedBox(height: 40),
+            SizedBox(height: 50),
+            _submitButton(),
             _deleteDataButton(),
           ],
         ),
@@ -564,6 +612,12 @@ class SettingsScreenState extends State<SettingsScreen>
           children: <Widget>[
             _title(),
             SizedBox(height: 150),
+            _changeNameSetting(),
+            _changeLoanSetting(),
+            SizedBox(height: 10),
+            _startDateFunctions(),
+            _endDateFunctions(),
+            SizedBox(height: 50),
             _submitButton(),
           ],
         ),

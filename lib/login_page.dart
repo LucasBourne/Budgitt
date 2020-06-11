@@ -124,8 +124,9 @@ class _LoginPageState extends State<LoginPage>
           passwordController.clear();
         }
       },
+      elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(40)
       ),
       color: accentColour,
       textColor: backgroundColour,
@@ -169,8 +170,9 @@ class _LoginPageState extends State<LoginPage>
           });
         }
       },
+      elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(40)
       ),
       color: accentColour,
       textColor: backgroundColour,
@@ -217,8 +219,9 @@ class _LoginPageState extends State<LoginPage>
             }
          });
         },
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5),
+          borderRadius: BorderRadius.circular(40)
         ),
         color: Colors.white,
         textColor: backgroundColour,
