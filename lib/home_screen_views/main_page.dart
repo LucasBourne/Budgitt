@@ -25,12 +25,44 @@ class MainScreenState extends State<MainScreen>
   {
     final snackBar = SnackBar(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: accentColour,
+      backgroundColor: backgroundColour,
       content: Text(
         message,
         style: GoogleFonts.karla(
-          color: backgroundColour
+          color: accentColour
         ),
+      ),
+    );
+    setState(() 
+    {
+      Scaffold.of(context).showSnackBar(snackBar);
+    });
+  }
+
+  void showTransactionSnackBar(String message, double transactionAmount)
+  {
+    final snackBar = SnackBar(
+      behavior: SnackBarBehavior.floating,
+      duration: Duration(seconds: 4),
+      backgroundColor: Colors.grey[850],
+      content: Text(
+        message,
+        style: GoogleFonts.karla(
+          color: accentColour
+        ),
+      ),
+      action: SnackBarAction(
+        label: "UNDO", 
+        onPressed: () {
+          String newWeeklySpend = (values["wSpend"] - transactionAmount).toStringAsFixed(2);
+
+          dbRef.child(userID).update({
+            "wSpend" : double.parse(newWeeklySpend),
+          });
+          setState(() {
+            readData();
+          });
+        }
       ),
     );
     setState(() 
@@ -213,9 +245,18 @@ class MainScreenState extends State<MainScreen>
           FocusScope.of(context).requestFocus(new FocusNode());
         },
         decoration: InputDecoration(
-          enabledBorder: UnderlineInputBorder(
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(40),
             borderSide: BorderSide(
-              color: accentColour
+              color: accentColour, 
+              width: 3.0,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(40),
+            borderSide: BorderSide(
+              color: accentColour, 
+              width: 3.0,
             ),
           ),
           labelText: "Transaction Amount (£)",
@@ -244,7 +285,7 @@ class MainScreenState extends State<MainScreen>
       setState(() 
       {
         readData();
-        showSnackBar("Payment of £" + transactionValue.toStringAsFixed(2) + " made successfully");
+        showTransactionSnackBar("Payment of £" + transactionValue.toStringAsFixed(2) + " made successfully", transactionValue);
         transactionController.clear();
       });
     }
@@ -330,58 +371,58 @@ class MainScreenState extends State<MainScreen>
 
   Widget build(BuildContext context) 
   {
-   return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              _title(),
-              Text(
-                (writeGreeting() + ", " + writeName()),
-                style: GoogleFonts.karla(
-                  color: accentColour,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-              SizedBox(height: 100),
-              Text(
-                'REMAINING WEEKLY SPEND:',
-                style: GoogleFonts.karla(
-                  color: accentColour,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              showLoanAmount(),
-              SizedBox(height: 10),
-              _transactionRow(),
-              SizedBox(height: 10),
-              RaisedButton(
-              onPressed: () {
-                if (values != null)
-                {
-                  values.clear();
-                }
-                signOutUser();
-                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) {return LoginPage();}), ModalRoute.withName('/'));
-              },
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          _title(),
+          Text(
+            (writeGreeting() + ", " + writeName()),
+            style: GoogleFonts.karla(
               color: accentColour,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Sign Out',
-                  style: GoogleFonts.karla(
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+          SizedBox(height: 100),
+          Text(
+            "REMAINING MONEY FOR THIS WEEKLY PERIOD:",
+            style: GoogleFonts.karla(
+              color: accentColour,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          showLoanAmount(),
+          SizedBox(height: 10),
+          _transactionRow(),
+          SizedBox(height: 10),
+          RaisedButton(
+            onPressed: () {
+              if (values != null)
+              {
+                values.clear();
+              }
+              signOutUser();
+              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) {return LoginPage();}), ModalRoute.withName('/'));
+            },
+            color: accentColour,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Sign Out',
+                style: GoogleFonts.karla(
                   color: backgroundColour,
                   fontWeight: FontWeight.bold
-                  ),
                 ),
               ),
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40)
-              ),
             ),
-          ],
-        ),
-      );
- }
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(40)
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

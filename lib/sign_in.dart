@@ -77,7 +77,7 @@ Future<String> signInWithGoogle() async
 
     return 'success';
   }
-  catch (Exception)
+  catch (e)
   {
     return "Google sign in error";
   }

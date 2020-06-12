@@ -245,12 +245,14 @@ class _LoginPageState extends State<LoginPage>
           labelStyle: GoogleFonts.karla(color: accentColour),
           icon: Icon(Icons.email, color: accentColour,),
           enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(40),
             borderSide: BorderSide(
               color: accentColour, 
               width: 3.0,
             ),
           ),
           focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(40),
             borderSide: BorderSide(
               color: accentColour, 
               width: 3.0,
@@ -296,12 +298,14 @@ class _LoginPageState extends State<LoginPage>
           labelStyle: GoogleFonts.karla(color: accentColour),
           icon: Icon(Icons.lock, color: accentColour,),
           enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(40),
             borderSide: BorderSide(
               color: accentColour, 
               width: 3.0,
             ),
           ),
           focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(40),
             borderSide: BorderSide(
               color: accentColour, 
               width: 3.0,
