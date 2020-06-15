@@ -25,11 +25,11 @@ class MainScreenState extends State<MainScreen>
   {
     final snackBar = SnackBar(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: backgroundColour,
+      backgroundColor: accentColour,
       content: Text(
         message,
         style: GoogleFonts.karla(
-          color: accentColour
+          color: backgroundColour
         ),
       ),
     );
@@ -276,18 +276,33 @@ class MainScreenState extends State<MainScreen>
     }
     else
     {
-      double transactionValue = double.parse(transactionController.text);
-      String newWeeklySpend = (values["wSpend"] + transactionValue).toStringAsFixed(2);
-
-      dbRef.child(userID).update({
-        "wSpend" : double.parse(newWeeklySpend),
-      });
-      setState(() 
+      try
       {
-        readData();
-        showTransactionSnackBar("Payment of £" + transactionValue.toStringAsFixed(2) + " made successfully", transactionValue);
+        double transactionValue = double.parse(transactionController.text);
+        if(double.parse(transactionValue.toStringAsFixed(2)) <= 0)
+        {
+          showSnackBar("ERROR: Transaction amount must be greater than zero");
+        }
+        else
+        {
+          String newWeeklySpend = (values["wSpend"] + transactionValue).toStringAsFixed(2);
+
+          dbRef.child(userID).update({
+            "wSpend" : double.parse(newWeeklySpend),
+          });
+          setState(() 
+          {
+            readData();
+            showTransactionSnackBar("Payment of £" + transactionValue.toStringAsFixed(2) + " made successfully", transactionValue);
+            transactionController.clear();
+          });
+        }
+      }
+      catch (FormatException)
+      {
+        showSnackBar("ERROR: Transaction amount is invalid");
         transactionController.clear();
-      });
+      }
     }
   }
 

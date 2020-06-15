@@ -27,6 +27,8 @@ class SettingsScreenState extends State<SettingsScreen>
   @override
   void initState()
   {
+    startDate = null;
+    endDate = null;
     super.initState();
     readData();
   }
@@ -290,6 +292,10 @@ class SettingsScreenState extends State<SettingsScreen>
             if(date != null)
             {
               startDate = date;
+              if(startDate.isAfter(endDate))
+              {
+                endDate = startDate.add(new Duration(days: 1));
+              }
               FocusScope.of(context).requestFocus(new FocusNode());
             }
           });
@@ -394,7 +400,10 @@ class SettingsScreenState extends State<SettingsScreen>
   {
     if (values != null && values.containsKey("iDat")) 
     {
-      startDate = DateTime.parse(values["iDat"]);
+      if (startDate == null)
+      {
+        startDate = DateTime.parse(values["iDat"]);
+      }
     }
     if (startDate != null)
     {
@@ -420,7 +429,10 @@ class SettingsScreenState extends State<SettingsScreen>
   {
     if (values != null && values.containsKey("oDat")) 
     {
-      endDate = DateTime.parse(values["oDat"]);
+      if (endDate == null)
+      {
+        endDate = DateTime.parse(values["oDat"]);
+      }
     }
     if (endDate != null)
     {

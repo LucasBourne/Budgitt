@@ -21,6 +21,7 @@ class _LoginPageState extends State<LoginPage>
   Widget build(BuildContext context) 
   {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       key: _scaffoldKey,
       backgroundColor: backgroundColour,
       body: Center(
@@ -34,7 +35,7 @@ class _LoginPageState extends State<LoginPage>
             _emailField(),
             SizedBox(height: 15),
             _passwordField(),
-            SizedBox(height: 5),
+            _signUp(),
             _signInFunctions(),
           ],
         ),
@@ -67,26 +68,18 @@ class _LoginPageState extends State<LoginPage>
   {
     return Padding(
       padding: EdgeInsets.fromLTRB(25, 0, 25, 0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>
-        [
-          _emailSignInFunctions(),
-          _otherSignIn(),
-        ],
-      ),
+      child: _signInButtons(),
     );
   }
 
-  Row _emailSignInFunctions()
+  Column _signInButtons()
   {
-    return Row(
+    return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>
       [
         _signInButton(),
-        SizedBox(width: 10),
-        _signUpButton(),
+        _signInGoogleButton(),
       ],
     );
   }
@@ -99,83 +92,107 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  RaisedButton _signUpButton()
+  Row _signUpButton()
   {
-    return RaisedButton(
-      child: Text(
-        "Sign up", 
-        style: GoogleFonts.karla(),
-      ),
-      onPressed: ()
-      {
-        if (emailController.text.trim().isEmpty)
-        {
-          showSnackBar("ERROR: Email field cannot be blank");
-        }
-        else if (passwordController.text.trim().isEmpty)
-        {
-          showSnackBar("ERROR: Password field cannot be blank");
-        }
-        else
-        {
-          signUpEmailPassword(emailController.text, passwordController.text);
-          showSnackBar("Account created successfully, you may now log in");
-          emailController.clear();
-          passwordController.clear();
-        }
-      },
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(40)
-      ),
-      color: accentColour,
-      textColor: backgroundColour,
-    );
-  }
-
-  RaisedButton _signInButton() 
-  {
-    return RaisedButton(
-      child: Text(
-        "Sign in",
-        style: GoogleFonts.karla(),
-      ),
-      onPressed: ()
-      {
-        if (emailController.text.trim().isEmpty)
-        {
-          showSnackBar("ERROR: Email field cannot be blank");
-        }
-        else if (passwordController.text.trim().isEmpty)
-        {
-          showSnackBar("ERROR: Password field cannot be blank");
-        }
-        else
-        {
-          signInEmailPassword(emailController.text.trim(), passwordController.text.trim()).then((result)
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        RaisedButton(
+          child: Text(
+            "Sign up", 
+            style: GoogleFonts.karla(),
+          ),
+          onPressed: ()
           {
-            if (result == "invalid login credentials")
+            bool isValidEmail = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(emailController.text.trim());
+            if (emailController.text.trim().isEmpty)
             {
-              showSnackBar("ERROR: Invalid login credentials");
+              showSnackBar("ERROR: Email field cannot be blank");
+            }
+            else if (!isValidEmail)
+            {
+              showSnackBar("ERROR: Invalid Email");
+            }
+            else if (passwordController.text.trim().isEmpty)
+            {
+              showSnackBar("ERROR: Password field cannot be blank");
+            }
+            else if (passwordController.text != confirmPasswordController.text)
+            {
+              showSnackBar("ERROR: Passwords do not match");
             }
             else
             {
-              Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) 
+              signUpEmailPassword(emailController.text.trim(), passwordController.text.trim()).then((value)
               {
-                return FirstScreen();
-              }
-            ));
+                showSnackBar(value);
+                emailController.clear();
+                passwordController.clear();
+                confirmPasswordController.clear();
+              });
+          
             }
-          });
-        }
-      },
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(40)
-      ),
-      color: accentColour,
-      textColor: backgroundColour,
+          },
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(40)
+        ),
+        color: accentColour,
+        textColor: backgroundColour,
+        ),
+        SizedBox(width: 25),
+      ],
+    );
+  }
+
+  Row _signInButton() 
+  {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        RaisedButton(
+          child: Text(
+            "Sign in",
+            style: GoogleFonts.karla(),
+          ),
+          onPressed: ()
+          {
+            if (emailController.text.trim().isEmpty)
+            {
+              showSnackBar("ERROR: Email field cannot be blank");
+            }
+            else if (passwordController.text.trim().isEmpty)
+            {
+              showSnackBar("ERROR: Password field cannot be blank");
+            }
+            else
+            {
+              signInEmailPassword(emailController.text.trim(), passwordController.text.trim()).then((result)
+              {
+                if (result == "invalid login credentials")
+                {
+                  showSnackBar("ERROR: Invalid login credentials");
+                }
+                else
+                {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) 
+                    {
+                      return FirstScreen();
+                    }
+                  ));
+                }
+              });
+            }
+          },
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(40)
+          ),
+          color: accentColour,
+          textColor: backgroundColour,
+        )
+      ],
     );
   }
 
@@ -231,6 +248,7 @@ class _LoginPageState extends State<LoginPage>
 
   TextEditingController emailController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
+  TextEditingController confirmPasswordController = new TextEditingController();
 
   Padding _emailField()
   {
@@ -266,12 +284,12 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  ExpansionTile _otherSignIn()
+  ExpansionTile _signUp()
   {
     return ExpansionTile(
       backgroundColor: Colors.transparent,
       title: Text(
-        "Other sign in options",
+        "Sign Up",
         textAlign: TextAlign.end,
         style: GoogleFonts.karla(
           color: accentColour,
@@ -280,7 +298,8 @@ class _LoginPageState extends State<LoginPage>
       ),
       children: <Widget>
       [
-        _signInGoogleButton(),
+        _confirmPasswordField(),
+        _signUpButton(),
       ],
     );
   }
@@ -295,6 +314,40 @@ class _LoginPageState extends State<LoginPage>
         cursorColor: accentColour,
         decoration: InputDecoration(
           labelText: "Password",
+          labelStyle: GoogleFonts.karla(color: accentColour),
+          icon: Icon(Icons.lock, color: accentColour,),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(40),
+            borderSide: BorderSide(
+              color: accentColour, 
+              width: 3.0,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(40),
+            borderSide: BorderSide(
+              color: accentColour, 
+              width: 3.0,
+            ),
+          )
+        ),
+        obscureText: true,
+        autocorrect: false,
+        keyboardType: TextInputType.text,
+      ),
+    );
+  }
+
+  Padding _confirmPasswordField()
+  {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
+      child: TextField(
+        style: GoogleFonts.karla(color: accentColour),
+        controller: confirmPasswordController,
+        cursorColor: accentColour,
+        decoration: InputDecoration(
+          labelText: "Confirm Password",
           labelStyle: GoogleFonts.karla(color: accentColour),
           icon: Icon(Icons.lock, color: accentColour,),
           enabledBorder: OutlineInputBorder(

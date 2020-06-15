@@ -9,15 +9,23 @@ String email;
 String imageUrl;
 String userID;
 
-void signUpEmailPassword(String em, String pw) async
+Future<String> signUpEmailPassword(String em, String pw) async
 {
   try
   {
     await _auth.createUserWithEmailAndPassword(email: em, password: pw);
+    return "Account successfully created. You may now sign in";
   }
   catch (e)
   {
-    print(e.toString());
+    if(e.code == "ERROR_WEAK_PASSWORD")
+    {
+      return "ERROR: Password is too weak";
+    }
+    else
+    {
+      return(e.message);
+    }
   }
 }
 
