@@ -24,7 +24,7 @@ Future<String> signUpEmailPassword(String em, String pw) async
     }
     else
     {
-      return(e.message);
+      return("ERROR" + e.message);
     }
   }
 }

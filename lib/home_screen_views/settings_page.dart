@@ -374,18 +374,6 @@ class SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  Text _title()
-  {
-    return Text(
-      "Settings",
-      style: GoogleFonts.karla(
-        fontSize: 50,
-        color: accentColour,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-
   void updateDateCode()
   {
     dbRef.child(userID).update({
@@ -698,8 +686,6 @@ class SettingsScreenState extends State<SettingsScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
-            _title(),
-            SizedBox(height: 150),
             _changeNameSetting(),
             SizedBox(height: 10),
             _changeLoanSetting(),
@@ -720,8 +706,6 @@ class SettingsScreenState extends State<SettingsScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
-            _title(),
-            SizedBox(height: 150),
             _changeNameSetting(),
             SizedBox(height: 10),
             _changeLoanSetting(),

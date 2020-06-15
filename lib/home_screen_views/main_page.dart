@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 
 import '../home_screen.dart';
 import '../sign_in.dart';
-import '../login_page.dart';
 
 class MainScreen extends StatefulWidget 
 {
@@ -75,6 +74,10 @@ class MainScreenState extends State<MainScreen>
   void initState()
   {
     super.initState();
+    if (values != null)
+    {
+      values.clear();
+    }
     readData();
   }
 
@@ -368,20 +371,7 @@ class MainScreenState extends State<MainScreen>
           color: accentColour,
         ),
       );
-    }
-    
-  }
-
-  Text _title()
-  {
-    return Text(
-      "Home",
-      style: GoogleFonts.karla(
-        fontSize: 50,
-        color: accentColour,
-        fontWeight: FontWeight.bold,
-      ),
-    );
+    }  
   }
 
   Widget build(BuildContext context) 
@@ -391,7 +381,6 @@ class MainScreenState extends State<MainScreen>
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
-          _title(),
           Text(
             (writeGreeting() + ", " + writeName()),
             style: GoogleFonts.karla(
@@ -409,33 +398,7 @@ class MainScreenState extends State<MainScreen>
           ),
           showLoanAmount(),
           SizedBox(height: 10),
-          _transactionRow(),
-          SizedBox(height: 10),
-          RaisedButton(
-            onPressed: () {
-              if (values != null)
-              {
-                values.clear();
-              }
-              signOutUser();
-              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) {return LoginPage();}), ModalRoute.withName('/'));
-            },
-            color: accentColour,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'Sign Out',
-                style: GoogleFonts.karla(
-                  color: backgroundColour,
-                  fontWeight: FontWeight.bold
-                ),
-              ),
-            ),
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(40)
-            ),
-          ),
+          _transactionRow(), 
         ],
       ),
     );
