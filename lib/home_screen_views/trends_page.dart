@@ -16,7 +16,7 @@ class TrendsScreenState extends State<TrendsScreen>
   {
     return Center(
       child: Text(
-        "Trends Screen", 
+        "Trends Page",
         style: GoogleFonts.karla(
           color: accentColour,
           fontStyle: FontStyle.italic,

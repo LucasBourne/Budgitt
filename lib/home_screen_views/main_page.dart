@@ -12,13 +12,26 @@ class MainScreen extends StatefulWidget
   MainScreenState createState() => MainScreenState();
 }
 
+String getDateCode(DateTime date)
+{
+  int dayOfYear = int.parse(DateFormat("D").format(date));
+  String weekNumber = ((dayOfYear - date.weekday + 10) / 7).floor().toString();
+  if (weekNumber.length < 2)
+  {
+    weekNumber = "0" + weekNumber;
+  }
+  String dateCode = date.year.toString() + weekNumber;
+  return dateCode; 
+}
+
+bool loanActive = false;
 TextEditingController transactionController = new TextEditingController();
 
 class MainScreenState extends State<MainScreen>
 {
   static Map<dynamic, dynamic> values = new Map<dynamic, dynamic>();
   final dbRef = FirebaseDatabase.instance.reference();
-  bool loanActive = false;
+
 
   void showSnackBar(String message)
   {
@@ -116,17 +129,8 @@ class MainScreenState extends State<MainScreen>
     }
     return greeting;
   }
-  String getDateCode(DateTime date)
-  {
-    int dayOfYear = int.parse(DateFormat("D").format(date));
-    String weekNumber = ((dayOfYear - date.weekday + 10) / 7).floor().toString();
-    if (weekNumber.length < 2)
-    {
-      weekNumber = "0" + weekNumber;
-    }
-    String dateCode = date.year.toString() + weekNumber;
-    return dateCode; 
-  }
+  
+
   Text getWeeklyAfterSpend()
   {
     String temp = getRemainingPerWeek();
@@ -135,7 +139,7 @@ class MainScreenState extends State<MainScreen>
       return Text(
         temp,
         style: GoogleFonts.karla(
-          color: Colors.amber[600]
+          color: accentColour,
         ),
       );
     }
@@ -145,13 +149,13 @@ class MainScreenState extends State<MainScreen>
       double toDeduct = values["wSpend"].toDouble();
       double afterWeeklyDeduction = beforeWeeklyDeduction - toDeduct;
       TextStyle style;
-      if (toDeduct + values["tSpend"] > values["loan"])
+      if (toDeduct + values["tSpend"] >= values["loan"])
       {
         style = GoogleFonts.karla(
           color: Colors.red[400],
         );
       }
-      else if (toDeduct > beforeWeeklyDeduction)
+      else if (toDeduct >= beforeWeeklyDeduction)
       {
         style = GoogleFonts.karla(
           color: Colors.amber[600],

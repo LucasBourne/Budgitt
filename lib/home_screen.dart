@@ -36,12 +36,63 @@ class FirstScreenState extends State<FirstScreen>
     titleText = titles[1];
   }
 
+  void _confirmSignOut() 
+  {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) 
+      {
+        return AlertDialog(
+          backgroundColor: backgroundColour,
+          title: Text(
+            "Sign Out",
+            style: GoogleFonts.karla(
+              color: accentColour,
+            ),
+          ),
+          content: Text(
+            "Are you sure you want to sign out?",
+            style: GoogleFonts.karla(
+              color: accentColour,
+            ),
+          ),
+          actions: <Widget>[
+            //buttons at the bottom of the dialog
+            FlatButton(
+              child: Text(
+                "Yes",
+                style: GoogleFonts.karla(
+                  color: accentColour,
+                ),
+              ),
+              onPressed: () {
+                signOutUser();
+                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) {return LoginPage();}), ModalRoute.withName('/'));
+              },
+            ),
+            FlatButton(
+              child: Text(
+                "No",
+                style: GoogleFonts.karla(
+                  color: accentColour,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
+
   RaisedButton _signOutButton()
   {
     return RaisedButton(
       onPressed: () {
-        signOutUser();
-        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) {return LoginPage();}), ModalRoute.withName('/'));
+        _confirmSignOut();
       },
       color: Colors.transparent,
       child: Padding(

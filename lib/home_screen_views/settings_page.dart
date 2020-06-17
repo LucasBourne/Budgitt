@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../home_screen.dart';
 import '../sign_in.dart';
@@ -292,7 +293,7 @@ class SettingsScreenState extends State<SettingsScreen>
             if(date != null)
             {
               startDate = date;
-              if(startDate.isAfter(endDate))
+              if(endDate == null || startDate.isAfter(endDate))
               {
                 endDate = startDate.add(new Duration(days: 1));
               }
@@ -335,7 +336,7 @@ class SettingsScreenState extends State<SettingsScreen>
         }
         if (endDate == null)
         {
-          tempEnd = DateTime.now().add(new Duration(days: 1));
+          tempEnd = tempStart.add(new Duration(days: 1));
         }
         else
         {
@@ -440,7 +441,6 @@ class SettingsScreenState extends State<SettingsScreen>
         ),
       );
     }
-    
   }
 
   String getDateCode(DateTime date)
@@ -453,6 +453,54 @@ class SettingsScreenState extends State<SettingsScreen>
     }
     String dateCode = date.year.toString() + weekNumber;
     return dateCode; 
+  }
+
+  _launchURL(String url) async 
+  {
+    if (await canLaunch(url)) 
+    {
+      await launch(url);
+    } 
+    else 
+    {
+      throw 'Could not launch $url';
+    }
+  }
+
+  RaisedButton _helpButton()
+  {
+    return RaisedButton(
+      onPressed: () 
+      {
+        _launchURL("https://www.practitioners.slc.co.uk/transcripts/how-to-view-your-payment-dates-and-status/");
+      },
+      color: accentColour,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              Icons.help,
+              color: backgroundColour,
+            ),
+            SizedBox(width: 10),
+            Text(
+             "Help Finding Details",
+              style: GoogleFonts.karla(
+                color: backgroundColour,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(40)
+      ),
+    );
   }
 
   RaisedButton _submitButton()
@@ -652,6 +700,83 @@ class SettingsScreenState extends State<SettingsScreen>
     );
   }
 
+  RaisedButton _creditsButton()
+  {
+    return RaisedButton(
+      onPressed: () {
+        _showCredits();
+      },
+      color: Colors.transparent,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          'Credits',
+          style: GoogleFonts.karla(
+            color: accentColour,
+            fontWeight: FontWeight.bold
+          ),
+        ),
+      ),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(40)
+      ),
+    );
+  }
+
+  void _showCredits() 
+  {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) 
+      {
+        return AlertDialog(
+          backgroundColor: backgroundColour,
+          title: Text(
+            "Credits",
+            style: GoogleFonts.karla(
+              color: accentColour,
+            ),
+          ),
+          content: Text(
+            "Developed by Lucas Bourne. Feel free to follow me or send me feedback on Twitter!",
+            style: GoogleFonts.karla(
+              color: accentColour,
+            ),
+          ),
+          actions: <Widget>[
+            //buttons at the bottom of the dialog
+            FlatButton(
+              child: Text(
+                "Twitter",
+                style: GoogleFonts.karla(
+                  color: accentColour,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                _launchURL("https://twitter.com/lucastbh");
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text(
+                "Close",
+                style: GoogleFonts.karla(
+                  color: accentColour,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
   RaisedButton _deleteDataButton()
   {
     return RaisedButton(
@@ -692,9 +817,12 @@ class SettingsScreenState extends State<SettingsScreen>
             SizedBox(height: 10),
             _startDateFunctions(),
             _endDateFunctions(),
+            _helpButton(),
             SizedBox(height: 50),
             _submitButton(),
             _deleteDataButton(),
+            SizedBox(height: 10),
+            _creditsButton(),
           ],
         ),
       );
@@ -712,8 +840,11 @@ class SettingsScreenState extends State<SettingsScreen>
             SizedBox(height: 10),
             _startDateFunctions(),
             _endDateFunctions(),
+            _helpButton(),
             SizedBox(height: 50),
             _submitButton(),
+            SizedBox(height: 10),
+            _creditsButton(),
           ],
         ),
       );
