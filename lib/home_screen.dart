@@ -67,7 +67,7 @@ class FirstScreenState extends State<FirstScreen>
               ),
               onPressed: () {
                 signOutUser();
-                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) {return LoginPage();}), ModalRoute.withName('/'));
+                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) {return LoginPage(true);}), ModalRoute.withName('/'));
               },
             ),
             FlatButton(

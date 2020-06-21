@@ -26,13 +26,11 @@ String getDateCode(DateTime date)
 
 bool loanActive = false;
 TextEditingController transactionController = new TextEditingController();
+Map<dynamic, dynamic> values = new Map<dynamic, dynamic>();
+final dbRef = FirebaseDatabase.instance.reference();
 
 class MainScreenState extends State<MainScreen>
 {
-  static Map<dynamic, dynamic> values = new Map<dynamic, dynamic>();
-  final dbRef = FirebaseDatabase.instance.reference();
-
-
   void showSnackBar(String message)
   {
     final snackBar = SnackBar(

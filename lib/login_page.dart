@@ -6,6 +6,8 @@ import 'sign_in.dart';
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
+
+  LoginPage(bool signedOut);
 }
 
 class _LoginPageState extends State<LoginPage> 

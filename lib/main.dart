@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: customColour,
         hintColor: Color.fromRGBO(2, 195, 154, 1),
       ),
-      home: LoginPage(),
+      home: LoginPage(false),
     );
   }
 }
