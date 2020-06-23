@@ -8,8 +8,8 @@ import 'home_screen_views/trends_page.dart';
 import 'login_page.dart';
 import 'sign_in.dart';
 
-Color accentColour = Color.fromRGBO(2, 195, 154, 1);
-Color backgroundColour = Color.fromRGBO(19, 21, 21, 1);
+Color accentColour = Colors.purple[300];
+Color backgroundColour = Colors.grey[900];
 var titles = ["Trends", "Home", "Settings"];
 String titleText = titles[1];
 
@@ -148,17 +148,26 @@ class FirstScreenState extends State<FirstScreen>
           GButton(
             icon: Icons.insert_chart,
             text: "Trends",
-            textStyle: GoogleFonts.karla(fontWeight: FontWeight.bold),
+            textStyle: GoogleFonts.karla(
+              fontWeight: FontWeight.bold,
+              color: backgroundColour,
+            ),
           ),
           GButton(
             icon: Icons.home,
             text: "Home",
-            textStyle: GoogleFonts.karla(fontWeight: FontWeight.bold),
+            textStyle: GoogleFonts.karla(
+              fontWeight: FontWeight.bold,
+              color: backgroundColour,
+            ),
           ),
           GButton(
             icon: Icons.settings,
             text: "Settings",
-            textStyle: GoogleFonts.karla(fontWeight: FontWeight.bold),
+            textStyle: GoogleFonts.karla(
+              fontWeight: FontWeight.bold,
+              color: backgroundColour,
+            ),
           ),
         ],
         selectedIndex: _selectedIndex,

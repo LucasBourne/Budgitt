@@ -20,11 +20,6 @@ class TrendsScreen extends StatefulWidget
   TrendsScreenState createState() => TrendsScreenState();
 }
 
-
-
-
-  
-
 /// Sample ordinal data type.
 class OrdinalSpend
 {
@@ -42,17 +37,30 @@ class TrendsScreenState extends State<TrendsScreen>
   {
     return new charts.BarChart(
       _createSampleData(),
+      behaviors: [
+        new charts.ChartTitle(
+          "Spend (£)",
+          behaviorPosition: charts.BehaviorPosition.start,
+          titleStyleSpec: new charts.TextStyleSpec(
+            fontFamily: 'Karla',
+            fontSize: 12, // size in Pts.
+            color: charts.Color.fromHex(code: "#BA68C8"),
+          ),
+          titleOutsideJustification: charts.OutsideJustification.middleDrawArea,
+        ),
+      ],
       animate: true,
       domainAxis: new charts.OrdinalAxisSpec(
         renderSpec: new charts.SmallTickRendererSpec(
           // Tick and Label styling here.
           labelStyle: new charts.TextStyleSpec(
+            fontFamily: 'Karla',
             fontSize: 12, // size in Pts.
-            color: charts.Color.fromHex(code: "#02c39a"),
+            color: charts.Color.fromHex(code: "#BA68C8"),
           ),
           // Change the line colors to match text color.
           lineStyle: new charts.LineStyleSpec(
-            color: charts.Color.fromHex(code: "#02c39a"),
+            color: charts.Color.fromHex(code: "#BA68C8"),
           )
         )
       ),
@@ -61,22 +69,24 @@ class TrendsScreenState extends State<TrendsScreen>
         renderSpec: new charts.GridlineRendererSpec(
           // Tick and Label styling here.
           labelStyle: new charts.TextStyleSpec(
+            fontFamily: 'Karla',
             fontSize: 12, // size in Pts.
-            color: charts.Color.fromHex(code: "#02c39a"),
+            color: charts.Color.fromHex(code: "#BA68C8"),
           ),
           // Change the line colors to match text color.
           lineStyle: new charts.LineStyleSpec(
-            color: charts.Color.fromHex(code: "#02c39a"),
+            color: charts.Color.fromHex(code: "#BA68C8"),
           )
         )
       ),
 
-      barGroupingType: charts.BarGroupingType.grouped,
-      customSeriesRenderers: [
+      barGroupingType: charts.BarGroupingType.stacked,
+      customSeriesRenderers: 
+      [
         new charts.BarTargetLineRendererConfig<String>(
           // ID used to link series to this renderer.
           customRendererId: 'customTargetLine',
-          groupingType: charts.BarGroupingType.grouped
+          groupingType: charts.BarGroupingType.stacked,
         )
       ]
     );
@@ -103,14 +113,14 @@ class TrendsScreenState extends State<TrendsScreen>
     return [
       new charts.Series<OrdinalSpend, String>(
         id: 'weeklySpend',
-        seriesColor: charts.Color.fromHex(code: "#02c39a"),
+        seriesColor: charts.Color.fromHex(code: "#BA68C8"),
         domainFn: (OrdinalSpend spend, _) => spend.title,
         measureFn: (OrdinalSpend spend, _) => spend.spend,
         data: weeklyData,
       ),
       new charts.Series<OrdinalSpend, String>(
         id: 'totalSpend',
-        seriesColor: charts.Color.fromHex(code: "#02c39a"),
+        seriesColor: charts.Color.fromHex(code: "#BA68C8"),
         domainFn: (OrdinalSpend spend, _) => spend.title,
         measureFn: (OrdinalSpend spend, _) => spend.spend,
         data: totalData,
@@ -222,7 +232,7 @@ class TrendsScreenState extends State<TrendsScreen>
         return Padding(
           padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
           child: Center(
-            child:  chart(),
+            child: chart(),
           ),
         ); 
       }

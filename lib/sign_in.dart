@@ -24,7 +24,7 @@ Future<String> signUpEmailPassword(String em, String pw) async
     }
     else
     {
-      return("ERROR" + e.message);
+      return("ERROR: " + e.message);
     }
   }
 }
@@ -45,11 +45,15 @@ Future<String> signInEmailPassword(String em, String pw) async
     final FirebaseUser currentUser = await _auth.currentUser();
     assert(user.uid == currentUser.uid);
 
-    return 'signInEmailPassword succeeded: $user';
+    return 'success';
   }
-  catch(PlatformException)
+  catch(e)
   {
-    return "invalid login credentials";
+    if(e.code == "ERROR_WRONG_PASSWORD")
+    {
+      return "Invalid login credentials";
+    }
+    return e.message;
   }
 }
 

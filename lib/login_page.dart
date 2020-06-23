@@ -45,8 +45,8 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  Color accentColour = Color.fromRGBO(2, 195, 154, 1);
-  Color backgroundColour = Color.fromRGBO(19, 21, 21, 1);
+  Color accentColour = Colors.purple[300];
+  Color backgroundColour = Colors.grey[900];
 
   void showSnackBar(String message)
   {
@@ -171,9 +171,9 @@ class _LoginPageState extends State<LoginPage>
             {
               signInEmailPassword(emailController.text.trim(), passwordController.text.trim()).then((result)
               {
-                if (result == "invalid login credentials")
+                if (result != "success")
                 {
-                  showSnackBar("ERROR: Invalid login credentials");
+                  showSnackBar("ERROR: " + result);
                 }
                 else
                 {
@@ -242,7 +242,7 @@ class _LoginPageState extends State<LoginPage>
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(40)
         ),
-        color: Colors.white,
+        color: Colors.grey[300],
         textColor: backgroundColour,
       ),
     );
@@ -286,23 +286,27 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  ExpansionTile _signUp()
+  Theme _signUp()
   {
-    return ExpansionTile(
-      backgroundColor: Colors.transparent,
-      title: Text(
-        "Sign Up",
-        textAlign: TextAlign.end,
-        style: GoogleFonts.karla(
-          color: accentColour,
-          fontSize: 15,
+    final theme = Theme.of(context).copyWith(dividerColor: Colors.transparent);
+    return Theme(
+      data: theme, 
+      child: ExpansionTile(
+        backgroundColor: Colors.transparent,
+        title: Text(
+          "Sign Up",
+          textAlign: TextAlign.end,
+          style: GoogleFonts.karla(
+            color: accentColour,
+            fontSize: 15,
+          ),
         ),
+        children: <Widget>
+        [
+          _confirmPasswordField(),
+          _signUpButton(),
+        ],
       ),
-      children: <Widget>
-      [
-        _confirmPasswordField(),
-        _signUpButton(),
-      ],
     );
   }
 
